@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: bakeflow-backend
+  profiles:
+    default: dev
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/bakeflow}
+    username: ${POSTGRES_USER:bakeflow}
+    password: ${POSTGRES_PASSWORD:change-me}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+server:
+  shutdown: graceful

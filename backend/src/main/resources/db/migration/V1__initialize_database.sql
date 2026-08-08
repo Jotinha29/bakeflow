@@ -1,0 +1,1 @@
+-- BakeFlow database baseline. Domain tables will be introduced by future migrations.

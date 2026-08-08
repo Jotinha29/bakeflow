@@ -1,0 +1,22 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/" aria-label="BakeFlow home">
+      <span class="brand-mark">B</span>
+      <span>BakeFlow</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <i class="pi pi-home" aria-hidden="true"></i>
+        Dashboard
+      </a>
+    </nav>
+  </aside>
+
+  <div class="content">
+    <header>
+      <span class="eyebrow">Production workspace</span>
+      <span class="environment"><span></span> Foundation</span>
+    </header>
+    <main><router-outlet /></main>
+  </div>
+</div>
