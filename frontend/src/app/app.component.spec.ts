@@ -4,12 +4,19 @@ import { provideRouter, Router } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { DashboardPageComponent } from './pages/dashboard/dashboard-page.component';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 describe('AppComponent', () => {
   it('renders the application shell and initial route', async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([{ path: '', component: DashboardPageComponent }])],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([{ path: '', component: DashboardPageComponent }]),
+        MessageService,
+        ConfirmationService,
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(AppComponent);

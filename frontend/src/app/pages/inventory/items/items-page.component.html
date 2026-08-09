@@ -1,0 +1,228 @@
+<header class="page-header">
+  <div>
+    <span class="kicker">Inventory catalog</span>
+    <h1>Items</h1>
+  </div>
+  <p-button label="Create item" icon="pi pi-plus" (onClick)="open()" />
+</header>
+<form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
+  <div class="field">
+    <label for="item-search">Name</label
+    ><input pInputText id="item-search" formControlName="search" />
+  </div>
+  <div class="field">
+    <label for="item-sku">SKU</label><input pInputText id="item-sku" formControlName="sku" />
+  </div>
+  <div class="field">
+    <label for="item-type">Type</label
+    ><p-select
+      inputId="item-type"
+      formControlName="type"
+      [options]="types"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <label for="item-status">Status</label
+    ><p-select
+      inputId="item-status"
+      formControlName="active"
+      [options]="statuses"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="actions">
+    <p-button
+      type="button"
+      label="Clear"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="clearFilters()"
+    /><p-button type="submit" label="Filter" icon="pi pi-filter" />
+  </div>
+</form>
+<section class="card">
+  <p-table
+    [value]="items()"
+    [loading]="loading()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="10"
+    [totalRecords]="total()"
+    (onPage)="page($event)"
+    [tableStyle]="{ 'min-width': '70rem' }"
+    ><ng-template #header
+      ><tr>
+        <th>Name</th>
+        <th>SKU</th>
+        <th>Barcode</th>
+        <th>Type</th>
+        <th>Unit</th>
+        <th>Minimum stock</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr></ng-template
+    ><ng-template #body let-item
+      ><tr>
+        <td>
+          <strong>{{ item.name }}</strong>
+        </td>
+        <td>{{ item.sku || '—' }}</td>
+        <td>{{ item.barcode || '—' }}</td>
+        <td>{{ label(item.type) }}</td>
+        <td>{{ item.unit }}</td>
+        <td>{{ item.minimumStock ?? '—' }}</td>
+        <td>
+          <p-tag
+            [value]="item.active ? 'Active' : 'Inactive'"
+            [severity]="item.active ? 'success' : 'secondary'"
+          />
+        </td>
+        <td>
+          <div class="row-actions">
+            <p-button
+              icon="pi pi-eye"
+              [text]="true"
+              severity="secondary"
+              pTooltip="View item"
+              [attr.aria-label]="'View ' + item.name"
+              (onClick)="open(item)"
+            /><p-button
+              icon="pi pi-pencil"
+              [text]="true"
+              severity="secondary"
+              pTooltip="Edit item"
+              [attr.aria-label]="'Edit ' + item.name"
+              (onClick)="open(item)"
+            /><p-button
+              [icon]="item.active ? 'pi pi-ban' : 'pi pi-check'"
+              [text]="true"
+              [severity]="item.active ? 'danger' : 'success'"
+              [pTooltip]="item.active ? 'Deactivate' : 'Activate'"
+              [attr.aria-label]="(item.active ? 'Deactivate ' : 'Activate ') + item.name"
+              (onClick)="toggle(item)"
+            />
+          </div>
+        </td></tr></ng-template
+    ><ng-template #emptymessage
+      ><tr>
+        <td colspan="8">
+          <div class="empty">
+            <p>No items found.</p>
+            <p-button label="Create item" [text]="true" (onClick)="open()" />
+          </div>
+        </td></tr></ng-template
+  ></p-table>
+</section>
+<p-dialog
+  [header]="editing() ? 'Edit item' : 'Create item'"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '42rem' }"
+  ><form [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <div class="field wide">
+        <label for="name">Name *</label><input pInputText id="name" formControlName="name" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <span class="error">Name is required.</span>
+        }
+      </div>
+      <div class="field">
+        <label for="sku">SKU</label><input pInputText id="sku" formControlName="sku" />
+      </div>
+      <div class="field">
+        <label for="barcode">Barcode</label>
+        <div class="lookup">
+          <input pInputText id="barcode" formControlName="barcode" /><p-button
+            type="button"
+            label="Find product"
+            icon="pi pi-search"
+            [loading]="lookupLoading()"
+            [disabled]="!form.controls.barcode.value"
+            (onClick)="lookup()"
+          />
+        </div>
+      </div>
+      <div class="field">
+        <label for="type">Type *</label
+        ><p-select
+          inputId="type"
+          formControlName="type"
+          [options]="types"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+      <div class="field">
+        <label for="unit">Unit *</label
+        ><p-select
+          inputId="unit"
+          formControlName="unit"
+          [options]="units"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+      <div class="field">
+        <label for="minimum">Minimum stock</label
+        ><p-inputnumber
+          inputId="minimum"
+          formControlName="minimumStock"
+          [min]="0"
+          [maxFractionDigits]="3"
+        />
+        @if (form.controls.minimumStock.touched && form.controls.minimumStock.invalid) {
+          <span class="error">Minimum stock cannot be negative.</span>
+        }
+      </div>
+    </div>
+    @if (product(); as p) {
+      <div class="product-result">
+        @if (p.imageUrl) {
+          <img [src]="p.imageUrl" alt="External product" />
+        }
+        <div>
+          @if (p.status === 'FOUND') {
+            <strong>Product found</strong>
+            <p>
+              {{ p.name }}
+              @if (p.brand) {
+                · {{ p.brand }}
+              }
+            </p>
+            <p-button
+              type="button"
+              label="Use information"
+              [text]="true"
+              (onClick)="useProduct()"
+            />
+          } @else {
+            <strong>{{
+              p.status === 'NOT_FOUND' ? 'No product found' : 'Lookup unavailable'
+            }}</strong>
+            <p>{{ p.message }}</p>
+          }
+        </div>
+      </div>
+    }
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="dialog.set(false)"
+      /><p-button
+        type="submit"
+        label="Save"
+        icon="pi pi-check"
+        [loading]="submitting()"
+        [disabled]="form.invalid || submitting()"
+      />
+    </div></form
+></p-dialog>

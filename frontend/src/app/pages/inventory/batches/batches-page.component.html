@@ -1,0 +1,172 @@
+<header class="page-header">
+  <div>
+    <span class="kicker">Inventory catalog</span>
+    <h1>Batches</h1>
+  </div>
+  <p-button label="Create batch" icon="pi pi-plus" (onClick)="open()" />
+</header>
+<form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
+  <div class="field">
+    <label for="batch-item">Item</label
+    ><p-select
+      inputId="batch-item"
+      formControlName="itemId"
+      [options]="items()"
+      optionLabel="name"
+      optionValue="id"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <label for="batch-code">Code</label><input pInputText id="batch-code" formControlName="code" />
+  </div>
+  <div class="field">
+    <label for="batch-status">Status</label
+    ><p-select
+      inputId="batch-status"
+      formControlName="active"
+      [options]="statuses"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <span class="field-label">Expiration period</span>
+    <div class="actions">
+      <p-datepicker
+        formControlName="expirationFrom"
+        placeholder="From"
+        dateFormat="yy-mm-dd"
+      /><p-datepicker formControlName="expirationTo" placeholder="To" dateFormat="yy-mm-dd" />
+    </div>
+  </div>
+  <div class="actions">
+    <p-button
+      type="button"
+      label="Clear"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="clearFilters()"
+    /><p-button type="submit" label="Filter" icon="pi pi-filter" />
+  </div>
+</form>
+<section class="card">
+  <p-table
+    [value]="batches()"
+    [loading]="loading()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="10"
+    [totalRecords]="total()"
+    (onPage)="page($event)"
+    ><ng-template #header
+      ><tr>
+        <th>Code</th>
+        <th>Item</th>
+        <th>Manufacturing date</th>
+        <th>Expiration date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr></ng-template
+    ><ng-template #body let-b
+      ><tr>
+        <td>
+          <strong>{{ b.code }}</strong>
+        </td>
+        <td>{{ b.itemName }}</td>
+        <td>{{ b.manufacturingDate || '—' }}</td>
+        <td>{{ b.expirationDate || '—' }}</td>
+        <td>
+          <p-tag
+            [value]="b.active ? 'Active' : 'Inactive'"
+            [severity]="b.active ? 'success' : 'secondary'"
+          />
+        </td>
+        <td>
+          <div class="row-actions">
+            <p-button
+              icon="pi pi-eye"
+              [text]="true"
+              severity="secondary"
+              pTooltip="View batch"
+              [attr.aria-label]="'View ' + b.code"
+              (onClick)="open(b)"
+            /><p-button
+              icon="pi pi-pencil"
+              [text]="true"
+              severity="secondary"
+              pTooltip="Edit batch"
+              [attr.aria-label]="'Edit ' + b.code"
+              (onClick)="open(b)"
+            /><p-button
+              [icon]="b.active ? 'pi pi-ban' : 'pi pi-check'"
+              [text]="true"
+              [severity]="b.active ? 'danger' : 'success'"
+              [pTooltip]="b.active ? 'Deactivate' : 'Activate'"
+              [attr.aria-label]="(b.active ? 'Deactivate ' : 'Activate ') + b.code"
+              (onClick)="toggle(b)"
+            />
+          </div>
+        </td></tr></ng-template
+    ><ng-template #emptymessage
+      ><tr>
+        <td colspan="6">
+          <div class="empty">
+            <p>No batches found.</p>
+            <p-button label="Create batch" [text]="true" (onClick)="open()" />
+          </div>
+        </td></tr></ng-template
+  ></p-table>
+</section>
+<p-dialog
+  [header]="editing() ? 'Edit batch' : 'Create batch'"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '38rem' }"
+  ><form [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <div class="field wide">
+        <label for="form-item">Item *</label
+        ><p-select
+          inputId="form-item"
+          formControlName="itemId"
+          [options]="items()"
+          optionLabel="name"
+          optionValue="id"
+          [disabled]="!!editing()"
+        />
+      </div>
+      <div class="field wide">
+        <label for="form-code">Code *</label
+        ><input pInputText id="form-code" formControlName="code" />
+      </div>
+      <div class="field">
+        <label for="manufacturing-date">Manufacturing date</label
+        ><p-datepicker inputId="manufacturing-date" formControlName="manufacturingDate" dateFormat="yy-mm-dd" />
+      </div>
+      <div class="field">
+        <label for="expiration-date">Expiration date</label
+        ><p-datepicker inputId="expiration-date" formControlName="expirationDate" dateFormat="yy-mm-dd" />
+        @if (invalidDates()) {
+          <span class="error">Expiration cannot be before manufacturing.</span>
+        }
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="dialog.set(false)"
+      /><p-button
+        type="submit"
+        label="Save"
+        icon="pi pi-check"
+        [loading]="submitting()"
+        [disabled]="form.invalid || invalidDates() || submitting()"
+      />
+    </div></form
+></p-dialog>

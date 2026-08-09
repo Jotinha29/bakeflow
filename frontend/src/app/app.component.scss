@@ -5,6 +5,7 @@
 .brand-mark { align-items: center; background: #d99152; border-radius: 10px; color: #17201d; display: inline-flex; height: 2.25rem; justify-content: center; width: 2.25rem; }
 nav a { align-items: center; border-radius: 9px; color: #b9c2bd; display: flex; gap: .75rem; padding: .85rem 1rem; text-decoration: none; }
 nav a.active, nav a:hover { background: #25312d; color: #fff; }
+.nav-section { color: #78847f; display: block; font-size: .68rem; font-weight: 700; letter-spacing: .12em; margin: 2rem 1rem .65rem; text-transform: uppercase; }
 .content { min-width: 0; }
 header { align-items: center; background: rgba(255,255,255,.86); border-bottom: 1px solid #e6e3dc; display: flex; justify-content: space-between; padding: 1.2rem 2.5rem; }
 .eyebrow { color: #66716c; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
@@ -15,5 +16,6 @@ main { padding: clamp(1.5rem, 4vw, 4rem); }
   .app-shell { grid-template-columns: 1fr; }
   .sidebar { padding: 1rem; }
   .brand { margin: 0 0 1rem; }
+  .nav-section { margin-top: 1rem; }
   header { padding: 1rem 1.25rem; }
 }

@@ -30,3 +30,8 @@ management:
 
 server:
   shutdown: graceful
+
+open-food-facts:
+  base-url: ${OPEN_FOOD_FACTS_BASE_URL:https://world.openfoodfacts.org}
+  connect-timeout: 2s
+  read-timeout: 4s

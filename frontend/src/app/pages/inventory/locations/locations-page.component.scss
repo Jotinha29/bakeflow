@@ -1,0 +1,53 @@
+.location-filters {
+  grid-template-columns: repeat(3, 1fr) auto;
+}
+.tree-card {
+  padding: 1rem;
+}
+.tree-title {
+  align-items: center;
+  border-bottom: 1px solid #ece8e0;
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+.location-node {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  min-width: min(60vw, 700px);
+  width: 100%;
+}
+.location-node small {
+  color: #7b8580;
+  margin-right: auto;
+}
+.node-actions {
+  display: flex;
+  opacity: 0.2;
+  transition: opacity 0.2s;
+}
+.location-node:hover .node-actions {
+  opacity: 1;
+}
+:host ::ng-deep .p-tree {
+  border: 0;
+  padding: 0.75rem;
+}
+:host ::ng-deep .p-tree-node-content {
+  padding: 0.4rem;
+}
+.tree-title i {
+  color: #ad6733;
+}
+@media (max-width: 850px) {
+  .location-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .location-node {
+    min-width: 600px;
+  }
+  .node-actions {
+    opacity: 1;
+  }
+}

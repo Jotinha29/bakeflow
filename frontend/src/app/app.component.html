@@ -9,6 +9,10 @@
         <i class="pi pi-home" aria-hidden="true"></i>
         Dashboard
       </a>
+      <span class="nav-section">Inventory</span>
+      <a routerLink="/inventory/items" routerLinkActive="active"><i class="pi pi-box" aria-hidden="true"></i>Items</a>
+      <a routerLink="/inventory/batches" routerLinkActive="active"><i class="pi pi-tags" aria-hidden="true"></i>Batches</a>
+      <a routerLink="/inventory/locations" routerLinkActive="active"><i class="pi pi-sitemap" aria-hidden="true"></i>Locations</a>
     </nav>
   </aside>
 
@@ -20,3 +24,5 @@
     <main><router-outlet /></main>
   </div>
 </div>
+<p-toast position="bottom-right" />
+<p-confirmdialog />

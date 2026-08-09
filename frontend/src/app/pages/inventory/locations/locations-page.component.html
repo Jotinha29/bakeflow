@@ -1,0 +1,146 @@
+<header class="page-header">
+  <div>
+    <span class="kicker">Inventory catalog</span>
+    <h1>Locations</h1>
+  </div>
+  <p-button label="Create location" icon="pi pi-plus" (onClick)="open()" />
+</header>
+<form class="filter-panel location-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
+  <div class="field">
+    <label for="location-search">Name</label
+    ><input pInputText id="location-search" formControlName="search" />
+  </div>
+  <div class="field">
+    <label for="location-type">Type</label
+    ><p-select
+      inputId="location-type"
+      formControlName="type"
+      [options]="types"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <label for="location-status">Status</label
+    ><p-select
+      inputId="location-status"
+      formControlName="active"
+      [options]="statuses"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="actions">
+    <p-button
+      type="button"
+      label="Clear"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="clearFilters()"
+    /><p-button type="submit" label="Filter" icon="pi pi-filter" />
+  </div>
+</form>
+<section class="card tree-card">
+  <div class="tree-title"><i class="pi pi-sitemap"></i><strong>Bakery Structure</strong></div>
+  @if (!loading() && nodes().length === 0) {
+    <div class="empty">
+      <p>No locations registered.</p>
+      <p-button label="Create location" [text]="true" (onClick)="open()" />
+    </div>
+  } @else {
+    <p-tree [value]="nodes()" [loading]="loading()"
+      ><ng-template #default let-node
+        ><div class="location-node">
+          <span>{{ node.label }}</span
+          ><small>{{ label(node.data.type) }} · {{ node.data.code }}</small
+          ><p-tag
+            [value]="node.data.active ? 'Active' : 'Inactive'"
+            [severity]="node.data.active ? 'success' : 'secondary'"
+          />
+          <div class="node-actions">
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              pTooltip="View or edit"
+              [attr.aria-label]="'Edit ' + node.label"
+              (onClick)="open(node.data)"
+            /><p-button
+              icon="pi pi-plus"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              pTooltip="Add child"
+              [attr.aria-label]="'Add child to ' + node.label"
+              (onClick)="open(undefined, node.data)"
+            /><p-button
+              [icon]="node.data.active ? 'pi pi-ban' : 'pi pi-check'"
+              [rounded]="true"
+              [text]="true"
+              [severity]="node.data.active ? 'danger' : 'success'"
+              [pTooltip]="node.data.active ? 'Deactivate' : 'Activate'"
+              [attr.aria-label]="(node.data.active ? 'Deactivate ' : 'Activate ') + node.label"
+              (onClick)="toggle(node.data)"
+            />
+          </div></div></ng-template
+    ></p-tree>
+  }
+</section>
+<p-dialog
+  [header]="editing() ? 'Edit location' : 'Create location'"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '38rem' }"
+  ><form [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <div class="field wide">
+        <label for="location-name">Name *</label
+        ><input pInputText id="location-name" formControlName="name" />
+      </div>
+      <div class="field">
+        <label for="location-code">Code *</label
+        ><input pInputText id="location-code" formControlName="code" />
+      </div>
+      <div class="field">
+        <label for="form-location-type">Type *</label
+        ><p-select
+          inputId="form-location-type"
+          formControlName="type"
+          [options]="types"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+      <div class="field wide">
+        <label for="location-parent">Parent location</label
+        ><p-select
+          inputId="location-parent"
+          formControlName="parentId"
+          [options]="allLocations()"
+          optionLabel="name"
+          optionValue="id"
+          [showClear]="true"
+          [filter]="true"
+        />
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        label="Cancel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="dialog.set(false)"
+      /><p-button
+        type="submit"
+        label="Save"
+        icon="pi pi-check"
+        [loading]="submitting()"
+        [disabled]="form.invalid || submitting()"
+      />
+    </div></form
+></p-dialog>

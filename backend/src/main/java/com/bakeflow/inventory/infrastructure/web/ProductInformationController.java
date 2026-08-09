@@ -1,0 +1,3 @@
+package com.bakeflow.inventory.infrastructure.web;
+import com.bakeflow.inventory.application.ProductInformationGateway;import com.bakeflow.inventory.application.InventoryDtos.ProductInformation;import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/v1/product-information")public class ProductInformationController{private final ProductInformationGateway gateway;ProductInformationController(ProductInformationGateway g){gateway=g;}@GetMapping("/barcode/{barcode}")public ProductInformation lookup(@PathVariable String barcode){return gateway.findByBarcode(barcode);}}
