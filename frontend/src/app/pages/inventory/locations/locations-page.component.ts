@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api';
@@ -15,6 +15,8 @@ import {
   LocationInput,
   LocationType,
 } from '../../../features/inventory/inventory.models';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 @Component({
   selector: 'app-locations-page',
   imports: [
@@ -26,6 +28,7 @@ import {
     TreeModule,
     TagModule,
     TooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './locations-page.component.html',
   styleUrls: ['../inventory-page.scss', './locations-page.component.scss'],
@@ -36,13 +39,14 @@ export class LocationsPageComponent {
   private api = inject(InventoryService);
   private messages = inject(MessageService);
   private confirmations = inject(ConfirmationService);
+  protected i18n = inject(I18nService);
   protected loading = signal(false);
   protected submitting = signal(false);
   protected nodes = signal<TreeNode<Location>[]>([]);
   protected allLocations = signal<Location[]>([]);
   protected dialog = signal(false);
   protected editing = signal<Location | undefined>(undefined);
-  protected types = [
+  protected types = computed(() => [
     'WAREHOUSE',
     'ROOM',
     'AISLE',
@@ -51,11 +55,9 @@ export class LocationsPageComponent {
     'PRODUCTION_AREA',
     'COLD_STORAGE',
     'OTHER',
-  ].map((value) => ({ label: this.label(value), value }));
-  protected statuses = [
-    { label: 'Active', value: true },
-    { label: 'Inactive', value: false },
-  ];
+  ].map((value) => ({ label: this.i18n.translate(`enum.locationType.${value}`), value })));
+  protected statuses = computed(() => [{ label: this.i18n.translate('common.active'), value: true },
+    { label: this.i18n.translate('common.inactive'), value: false }]);
   protected filters = this.fb.group({
     search: [''],
     type: ['' as LocationType | ''],
@@ -80,7 +82,7 @@ export class LocationsPageComponent {
           this.allLocations.set(this.flatten(tree));
           this.nodes.set(this.mapNodes(tree));
         },
-        error: () => this.error('Could not load locations.'),
+        error: () => this.error(this.i18n.translate('locations.loadError')),
       });
   }
   protected applyFilters() {
@@ -101,7 +103,7 @@ export class LocationsPageComponent {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (r) => this.nodes.set(r.content.map((l) => this.node({ ...l, children: [] }))),
-        error: () => this.error('Could not filter locations.'),
+        error: () => this.error(this.i18n.translate('locations.filterError')),
       });
   }
   protected clearFilters() {
@@ -140,38 +142,31 @@ export class LocationsPageComponent {
           this.dialog.set(false);
           this.messages.add({
             severity: 'success',
-            summary: 'Success',
-            detail: `Location ${this.editing() ? 'updated' : 'created'} successfully.`,
+            summary: this.i18n.translate('common.success'), detail: this.i18n.translate(this.editing() ? 'locations.updated' : 'locations.created'),
           });
           this.loadTree();
         },
-        error: (e) => this.error(e.error?.message ?? 'Could not save location.'),
+        error: (e) => this.error(this.i18n.translateError(e, 'locations.saveError')),
       });
   }
   protected toggle(l: Location) {
     this.confirmations.confirm({
-      header: `${l.active ? 'Deactivate' : 'Activate'} location?`,
-      message: `${l.name} will be ${l.active ? 'unavailable' : 'available'} for new operations.`,
+      header: this.i18n.translate('locations.confirmHeader', { action: this.i18n.translate(l.active ? 'common.deactivate' : 'common.activate') }),
+      message: this.i18n.translate('locations.confirmMessage', { name: l.name, availability: this.i18n.translate(l.active ? 'items.unavailable' : 'items.available') }),
       accept: () =>
         this.api.setLocationActive(l.id, !l.active).subscribe({
           next: () => {
             this.messages.add({
               severity: 'success',
-              summary: 'Success',
-              detail: `Location ${l.active ? 'deactivated' : 'activated'} successfully.`,
+              summary: this.i18n.translate('common.success'), detail: this.i18n.translate(l.active ? 'locations.deactivated' : 'locations.activated'),
             });
             this.loadTree();
           },
-          error: () => this.error('Could not update location status.'),
+          error: () => this.error(this.i18n.translate('locations.statusError')),
         }),
     });
   }
-  protected label(v: string) {
-    return v
-      .toLowerCase()
-      .replaceAll('_', ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-  }
+  protected label(v: string) { return this.i18n.translate(`enum.locationType.${v}`); }
   private mapNodes(values: Location[]): TreeNode<Location>[] {
     return values.map((v) => this.node(v));
   }
@@ -200,6 +195,6 @@ export class LocationsPageComponent {
             : 'pi pi-building';
   }
   private error(detail: string) {
-    this.messages.add({ severity: 'error', summary: 'Something went wrong', detail });
+    this.messages.add({ severity: 'error', summary: this.i18n.translate('common.error'), detail });
   }
 }

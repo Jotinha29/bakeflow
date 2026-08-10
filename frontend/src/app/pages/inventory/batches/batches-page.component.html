@@ -1,13 +1,12 @@
 <header class="page-header">
   <div>
-    <span class="kicker">Inventory catalog</span>
-    <h1>Batches</h1>
+    <span class="kicker">{{ 'inventory.catalog' | translate }}</span><h1>{{ 'batches.title' | translate }}</h1>
   </div>
-  <p-button label="Create batch" icon="pi pi-plus" (onClick)="open()" />
+  <p-button [label]="'batches.create' | translate" icon="pi pi-plus" (onClick)="open()" />
 </header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
-    <label for="batch-item">Item</label
+    <label for="batch-item">{{ 'batches.item' | translate }}</label
     ><p-select
       inputId="batch-item"
       formControlName="itemId"
@@ -18,37 +17,37 @@
     />
   </div>
   <div class="field">
-    <label for="batch-code">Code</label><input pInputText id="batch-code" formControlName="code" />
+    <label for="batch-code">{{ 'common.code' | translate }}</label><input pInputText id="batch-code" formControlName="code" />
   </div>
   <div class="field">
-    <label for="batch-status">Status</label
+    <label for="batch-status">{{ 'common.status' | translate }}</label
     ><p-select
       inputId="batch-status"
       formControlName="active"
-      [options]="statuses"
+      [options]="statuses()"
       optionLabel="label"
       optionValue="value"
       [showClear]="true"
     />
   </div>
   <div class="field">
-    <span class="field-label">Expiration period</span>
+    <span class="field-label">{{ 'batches.expirationPeriod' | translate }}</span>
     <div class="actions">
       <p-datepicker
         formControlName="expirationFrom"
-        placeholder="From"
-        dateFormat="yy-mm-dd"
-      /><p-datepicker formControlName="expirationTo" placeholder="To" dateFormat="yy-mm-dd" />
+        [placeholder]="'batches.from' | translate"
+        [dateFormat]="i18n.dateFormat()"
+      /><p-datepicker formControlName="expirationTo" [placeholder]="'batches.to' | translate" [dateFormat]="i18n.dateFormat()" />
     </div>
   </div>
   <div class="actions">
     <p-button
       type="button"
-      label="Clear"
+      [label]="'common.clear' | translate"
       severity="secondary"
       [outlined]="true"
       (onClick)="clearFilters()"
-    /><p-button type="submit" label="Filter" icon="pi pi-filter" />
+    /><p-button type="submit" [label]="'common.filter' | translate" icon="pi pi-filter" />
   </div>
 </form>
 <section class="card">
@@ -62,12 +61,9 @@
     (onPage)="page($event)"
     ><ng-template #header
       ><tr>
-        <th>Code</th>
-        <th>Item</th>
-        <th>Manufacturing date</th>
-        <th>Expiration date</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th>{{ 'common.code' | translate }}</th><th>{{ 'batches.item' | translate }}</th>
+        <th>{{ 'batches.manufacturingDate' | translate }}</th><th>{{ 'batches.expirationDate' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th><th>{{ 'common.actions' | translate }}</th>
       </tr></ng-template
     ><ng-template #body let-b
       ><tr>
@@ -75,11 +71,10 @@
           <strong>{{ b.code }}</strong>
         </td>
         <td>{{ b.itemName }}</td>
-        <td>{{ b.manufacturingDate || '—' }}</td>
-        <td>{{ b.expirationDate || '—' }}</td>
+        <td>{{ b.manufacturingDate | localizedDate }}</td><td>{{ b.expirationDate | localizedDate }}</td>
         <td>
           <p-tag
-            [value]="b.active ? 'Active' : 'Inactive'"
+            [value]="(b.active ? 'common.active' : 'common.inactive') | translate"
             [severity]="b.active ? 'success' : 'secondary'"
           />
         </td>
@@ -89,22 +84,22 @@
               icon="pi pi-eye"
               [text]="true"
               severity="secondary"
-              pTooltip="View batch"
-              [attr.aria-label]="'View ' + b.code"
+              [pTooltip]="'common.view' | translate"
+              [attr.aria-label]="('common.view' | translate) + ' ' + b.code"
               (onClick)="open(b)"
             /><p-button
               icon="pi pi-pencil"
               [text]="true"
               severity="secondary"
-              pTooltip="Edit batch"
-              [attr.aria-label]="'Edit ' + b.code"
+              [pTooltip]="'common.edit' | translate"
+              [attr.aria-label]="('common.edit' | translate) + ' ' + b.code"
               (onClick)="open(b)"
             /><p-button
               [icon]="b.active ? 'pi pi-ban' : 'pi pi-check'"
               [text]="true"
               [severity]="b.active ? 'danger' : 'success'"
-              [pTooltip]="b.active ? 'Deactivate' : 'Activate'"
-              [attr.aria-label]="(b.active ? 'Deactivate ' : 'Activate ') + b.code"
+              [pTooltip]="(b.active ? 'common.deactivate' : 'common.activate') | translate"
+              [attr.aria-label]="((b.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + b.code"
               (onClick)="toggle(b)"
             />
           </div>
@@ -113,14 +108,13 @@
       ><tr>
         <td colspan="6">
           <div class="empty">
-            <p>No batches found.</p>
-            <p-button label="Create batch" [text]="true" (onClick)="open()" />
+            <p>{{ 'batches.empty' | translate }}</p><p-button [label]="'batches.create' | translate" [text]="true" (onClick)="open()" />
           </div>
         </td></tr></ng-template
   ></p-table>
 </section>
 <p-dialog
-  [header]="editing() ? 'Edit batch' : 'Create batch'"
+  [header]="(editing() ? 'batches.edit' : 'batches.create') | translate"
   [visible]="dialog()"
   (visibleChange)="dialog.set($event)"
   [modal]="true"
@@ -128,7 +122,7 @@
   ><form [formGroup]="form" (ngSubmit)="save()">
     <div class="form-grid">
       <div class="field wide">
-        <label for="form-item">Item *</label
+        <label for="form-item">{{ 'batches.item' | translate }} *</label
         ><p-select
           inputId="form-item"
           formControlName="itemId"
@@ -139,31 +133,31 @@
         />
       </div>
       <div class="field wide">
-        <label for="form-code">Code *</label
+        <label for="form-code">{{ 'common.code' | translate }} *</label
         ><input pInputText id="form-code" formControlName="code" />
       </div>
       <div class="field">
-        <label for="manufacturing-date">Manufacturing date</label
-        ><p-datepicker inputId="manufacturing-date" formControlName="manufacturingDate" dateFormat="yy-mm-dd" />
+        <label for="manufacturing-date">{{ 'batches.manufacturingDate' | translate }}</label
+        ><p-datepicker inputId="manufacturing-date" formControlName="manufacturingDate" [dateFormat]="i18n.dateFormat()" />
       </div>
       <div class="field">
-        <label for="expiration-date">Expiration date</label
-        ><p-datepicker inputId="expiration-date" formControlName="expirationDate" dateFormat="yy-mm-dd" />
+        <label for="expiration-date">{{ 'batches.expirationDate' | translate }}</label
+        ><p-datepicker inputId="expiration-date" formControlName="expirationDate" [dateFormat]="i18n.dateFormat()" />
         @if (invalidDates()) {
-          <span class="error">Expiration cannot be before manufacturing.</span>
+          <span class="error">{{ 'batches.dateInvalid' | translate }}</span>
         }
       </div>
     </div>
     <div class="dialog-actions">
       <p-button
         type="button"
-        label="Cancel"
+        [label]="'common.cancel' | translate"
         severity="secondary"
         [outlined]="true"
         (onClick)="dialog.set(false)"
       /><p-button
         type="submit"
-        label="Save"
+        [label]="'common.save' | translate"
         icon="pi pi-check"
         [loading]="submitting()"
         [disabled]="form.invalid || invalidDates() || submitting()"

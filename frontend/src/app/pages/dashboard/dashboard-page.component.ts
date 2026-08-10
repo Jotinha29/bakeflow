@@ -3,10 +3,11 @@ import { AsyncPipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SystemStatusService } from '../../core/services/system-status.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [AsyncPipe, CardModule, TagModule],
+  imports: [AsyncPipe, CardModule, TagModule, TranslatePipe],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

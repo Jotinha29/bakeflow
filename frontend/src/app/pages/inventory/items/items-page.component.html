@@ -1,35 +1,35 @@
 <header class="page-header">
   <div>
-    <span class="kicker">Inventory catalog</span>
-    <h1>Items</h1>
+    <span class="kicker">{{ 'inventory.catalog' | translate }}</span>
+    <h1>{{ 'items.title' | translate }}</h1>
   </div>
-  <p-button label="Create item" icon="pi pi-plus" (onClick)="open()" />
+  <p-button [label]="'items.create' | translate" icon="pi pi-plus" (onClick)="open()" />
 </header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
-    <label for="item-search">Name</label
+    <label for="item-search">{{ 'common.name' | translate }}</label
     ><input pInputText id="item-search" formControlName="search" />
   </div>
   <div class="field">
     <label for="item-sku">SKU</label><input pInputText id="item-sku" formControlName="sku" />
   </div>
   <div class="field">
-    <label for="item-type">Type</label
+    <label for="item-type">{{ 'common.type' | translate }}</label
     ><p-select
       inputId="item-type"
       formControlName="type"
-      [options]="types"
+      [options]="types()"
       optionLabel="label"
       optionValue="value"
       [showClear]="true"
     />
   </div>
   <div class="field">
-    <label for="item-status">Status</label
+    <label for="item-status">{{ 'common.status' | translate }}</label
     ><p-select
       inputId="item-status"
       formControlName="active"
-      [options]="statuses"
+      [options]="statuses()"
       optionLabel="label"
       optionValue="value"
       [showClear]="true"
@@ -38,11 +38,11 @@
   <div class="actions">
     <p-button
       type="button"
-      label="Clear"
+      [label]="'common.clear' | translate"
       severity="secondary"
       [outlined]="true"
       (onClick)="clearFilters()"
-    /><p-button type="submit" label="Filter" icon="pi pi-filter" />
+    /><p-button type="submit" [label]="'common.filter' | translate" icon="pi pi-filter" />
   </div>
 </form>
 <section class="card">
@@ -57,14 +57,11 @@
     [tableStyle]="{ 'min-width': '70rem' }"
     ><ng-template #header
       ><tr>
-        <th>Name</th>
+        <th>{{ 'common.name' | translate }}</th>
         <th>SKU</th>
-        <th>Barcode</th>
-        <th>Type</th>
-        <th>Unit</th>
-        <th>Minimum stock</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th>{{ 'items.barcode' | translate }}</th><th>{{ 'common.type' | translate }}</th>
+        <th>{{ 'items.unit' | translate }}</th><th>{{ 'items.minimumStock' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th><th>{{ 'common.actions' | translate }}</th>
       </tr></ng-template
     ><ng-template #body let-item
       ><tr>
@@ -74,11 +71,11 @@
         <td>{{ item.sku || '—' }}</td>
         <td>{{ item.barcode || '—' }}</td>
         <td>{{ label(item.type) }}</td>
-        <td>{{ item.unit }}</td>
-        <td>{{ item.minimumStock ?? '—' }}</td>
+        <td>{{ 'enum.unit.' + item.unit | translate }}</td>
+        <td>{{ item.minimumStock | localizedNumber }}</td>
         <td>
           <p-tag
-            [value]="item.active ? 'Active' : 'Inactive'"
+            [value]="(item.active ? 'common.active' : 'common.inactive') | translate"
             [severity]="item.active ? 'success' : 'secondary'"
           />
         </td>
@@ -88,22 +85,22 @@
               icon="pi pi-eye"
               [text]="true"
               severity="secondary"
-              pTooltip="View item"
-              [attr.aria-label]="'View ' + item.name"
+              [pTooltip]="'common.view' | translate"
+              [attr.aria-label]="('common.view' | translate) + ' ' + item.name"
               (onClick)="open(item)"
             /><p-button
               icon="pi pi-pencil"
               [text]="true"
               severity="secondary"
-              pTooltip="Edit item"
-              [attr.aria-label]="'Edit ' + item.name"
+              [pTooltip]="'common.edit' | translate"
+              [attr.aria-label]="('common.edit' | translate) + ' ' + item.name"
               (onClick)="open(item)"
             /><p-button
               [icon]="item.active ? 'pi pi-ban' : 'pi pi-check'"
               [text]="true"
               [severity]="item.active ? 'danger' : 'success'"
-              [pTooltip]="item.active ? 'Deactivate' : 'Activate'"
-              [attr.aria-label]="(item.active ? 'Deactivate ' : 'Activate ') + item.name"
+              [pTooltip]="(item.active ? 'common.deactivate' : 'common.activate') | translate"
+              [attr.aria-label]="((item.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + item.name"
               (onClick)="toggle(item)"
             />
           </div>
@@ -112,14 +109,14 @@
       ><tr>
         <td colspan="8">
           <div class="empty">
-            <p>No items found.</p>
-            <p-button label="Create item" [text]="true" (onClick)="open()" />
+            <p>{{ 'items.empty' | translate }}</p>
+            <p-button [label]="'items.create' | translate" [text]="true" (onClick)="open()" />
           </div>
         </td></tr></ng-template
   ></p-table>
 </section>
 <p-dialog
-  [header]="editing() ? 'Edit item' : 'Create item'"
+  [header]="(editing() ? 'items.edit' : 'items.create') | translate"
   [visible]="dialog()"
   (visibleChange)="dialog.set($event)"
   [modal]="true"
@@ -127,20 +124,20 @@
   ><form [formGroup]="form" (ngSubmit)="save()">
     <div class="form-grid">
       <div class="field wide">
-        <label for="name">Name *</label><input pInputText id="name" formControlName="name" />
+        <label for="name">{{ 'common.name' | translate }} *</label><input pInputText id="name" formControlName="name" />
         @if (form.controls.name.touched && form.controls.name.invalid) {
-          <span class="error">Name is required.</span>
+          <span class="error">{{ 'items.nameRequired' | translate }}</span>
         }
       </div>
       <div class="field">
         <label for="sku">SKU</label><input pInputText id="sku" formControlName="sku" />
       </div>
       <div class="field">
-        <label for="barcode">Barcode</label>
+        <label for="barcode">{{ 'items.barcode' | translate }}</label>
         <div class="lookup">
           <input pInputText id="barcode" formControlName="barcode" /><p-button
             type="button"
-            label="Find product"
+            [label]="'items.findProduct' | translate"
             icon="pi pi-search"
             [loading]="lookupLoading()"
             [disabled]="!form.controls.barcode.value"
@@ -149,27 +146,27 @@
         </div>
       </div>
       <div class="field">
-        <label for="type">Type *</label
+        <label for="type">{{ 'common.type' | translate }} *</label
         ><p-select
           inputId="type"
           formControlName="type"
-          [options]="types"
+          [options]="types()"
           optionLabel="label"
           optionValue="value"
         />
       </div>
       <div class="field">
-        <label for="unit">Unit *</label
+        <label for="unit">{{ 'items.unit' | translate }} *</label
         ><p-select
           inputId="unit"
           formControlName="unit"
-          [options]="units"
+          [options]="units()"
           optionLabel="label"
           optionValue="value"
         />
       </div>
       <div class="field">
-        <label for="minimum">Minimum stock</label
+        <label for="minimum">{{ 'items.minimumStock' | translate }}</label
         ><p-inputnumber
           inputId="minimum"
           formControlName="minimumStock"
@@ -177,18 +174,18 @@
           [maxFractionDigits]="3"
         />
         @if (form.controls.minimumStock.touched && form.controls.minimumStock.invalid) {
-          <span class="error">Minimum stock cannot be negative.</span>
+          <span class="error">{{ 'items.minimumInvalid' | translate }}</span>
         }
       </div>
     </div>
     @if (product(); as p) {
       <div class="product-result">
         @if (p.imageUrl) {
-          <img [src]="p.imageUrl" alt="External product" />
+          <img [src]="p.imageUrl" [alt]="'items.externalProduct' | translate" />
         }
         <div>
           @if (p.status === 'FOUND') {
-            <strong>Product found</strong>
+            <strong>{{ 'items.productFound' | translate }}</strong>
             <p>
               {{ p.name }}
               @if (p.brand) {
@@ -197,13 +194,13 @@
             </p>
             <p-button
               type="button"
-              label="Use information"
+              [label]="'items.useInformation' | translate"
               [text]="true"
               (onClick)="useProduct()"
             />
           } @else {
             <strong>{{
-              p.status === 'NOT_FOUND' ? 'No product found' : 'Lookup unavailable'
+              (p.status === 'NOT_FOUND' ? 'items.noProduct' : 'items.lookupUnavailable') | translate
             }}</strong>
             <p>{{ p.message }}</p>
           }
@@ -213,13 +210,13 @@
     <div class="dialog-actions">
       <p-button
         type="button"
-        label="Cancel"
+        [label]="'common.cancel' | translate"
         severity="secondary"
         [outlined]="true"
         (onClick)="dialog.set(false)"
       /><p-button
         type="submit"
-        label="Save"
+        [label]="'common.save' | translate"
         icon="pi pi-check"
         [loading]="submitting()"
         [disabled]="form.invalid || submitting()"

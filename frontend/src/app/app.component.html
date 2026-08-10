@@ -1,25 +1,28 @@
 <div class="app-shell">
   <aside class="sidebar">
-    <a class="brand" routerLink="/" aria-label="BakeFlow home">
+    <a class="brand" routerLink="/" [attr.aria-label]="'app.home' | translate">
       <span class="brand-mark">B</span>
       <span>BakeFlow</span>
     </a>
-    <nav aria-label="Main navigation">
+    <nav [attr.aria-label]="'nav.main' | translate">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <i class="pi pi-home" aria-hidden="true"></i>
-        Dashboard
+        {{ 'nav.dashboard' | translate }}
       </a>
-      <span class="nav-section">Inventory</span>
-      <a routerLink="/inventory/items" routerLinkActive="active"><i class="pi pi-box" aria-hidden="true"></i>Items</a>
-      <a routerLink="/inventory/batches" routerLinkActive="active"><i class="pi pi-tags" aria-hidden="true"></i>Batches</a>
-      <a routerLink="/inventory/locations" routerLinkActive="active"><i class="pi pi-sitemap" aria-hidden="true"></i>Locations</a>
+      <span class="nav-section">{{ 'nav.inventory' | translate }}</span>
+      <a routerLink="/inventory/items" routerLinkActive="active"><i class="pi pi-box" aria-hidden="true"></i>{{ 'nav.items' | translate }}</a>
+      <a routerLink="/inventory/batches" routerLinkActive="active"><i class="pi pi-tags" aria-hidden="true"></i>{{ 'nav.batches' | translate }}</a>
+      <a routerLink="/inventory/locations" routerLinkActive="active"><i class="pi pi-sitemap" aria-hidden="true"></i>{{ 'nav.locations' | translate }}</a>
     </nav>
+    <div class="language-selector"><label for="language"><i class="pi pi-globe"></i> {{ 'language.label' | translate }}</label>
+      <p-select inputId="language" [options]="languages" optionLabel="label" optionValue="value" [ngModel]="i18n.language()" (ngModelChange)="changeLanguage($event)" appendTo="body" />
+    </div>
   </aside>
 
   <div class="content">
     <header>
-      <span class="eyebrow">Production workspace</span>
-      <span class="environment"><span></span> Foundation</span>
+      <span class="eyebrow">{{ 'app.workspace' | translate }}</span>
+      <span class="environment"><span></span> {{ 'app.foundation' | translate }}</span>
     </header>
     <main><router-outlet /></main>
   </div>

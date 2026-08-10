@@ -1,27 +1,27 @@
 <section class="hero">
-  <span class="kicker">BakeFlow workspace</span>
-  <h1>Gestão inteligente de<br />estoque e produção.</h1>
-  <p>Uma base confiável para organizar operações de alimentos com clareza e precisão.</p>
+  <span class="kicker">{{ 'dashboard.kicker' | translate }}</span>
+  <h1>{{ 'dashboard.title' | translate }}</h1>
+  <p>{{ 'dashboard.subtitle' | translate }}</p>
 </section>
 
 @if (status$ | async; as system) {
   <section class="status-panel" aria-labelledby="status-title">
     <div>
-      <span class="kicker">Infrastructure</span>
-      <h2 id="status-title">Sistema {{ system.status === 'UP' ? 'operacional' : 'indisponível' }}.</h2>
+      <span class="kicker">{{ 'dashboard.infrastructure' | translate }}</span>
+      <h2 id="status-title">{{ (system.status === 'UP' ? 'dashboard.operational' : 'dashboard.unavailable') | translate }}</h2>
     </div>
     <div class="status-grid">
       <p-card>
         <span>Backend</span>
-        <p-tag [value]="system.status" [severity]="system.status === 'UP' ? 'success' : 'danger'" />
+        <p-tag [value]="(system.status === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate" [severity]="system.status === 'UP' ? 'success' : 'danger'" />
       </p-card>
       <p-card>
         <span>PostgreSQL</span>
-        <p-tag [value]="system.postgres" [severity]="system.postgres === 'UP' ? 'success' : 'danger'" />
+        <p-tag [value]="(system.postgres === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate" [severity]="system.postgres === 'UP' ? 'success' : 'danger'" />
       </p-card>
       <p-card>
         <span>Redis</span>
-        <p-tag [value]="system.redis" [severity]="system.redis === 'UP' ? 'success' : 'danger'" />
+        <p-tag [value]="(system.redis === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate" [severity]="system.redis === 'UP' ? 'success' : 'danger'" />
       </p-card>
     </div>
   </section>

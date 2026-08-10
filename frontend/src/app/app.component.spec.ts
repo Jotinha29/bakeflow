@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { DashboardPageComponent } from './pages/dashboard/dashboard-page.component';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { providePrimeNG } from 'primeng/config';
 
 describe('AppComponent', () => {
   it('renders the application shell and initial route', async () => {
@@ -16,6 +17,7 @@ describe('AppComponent', () => {
         provideRouter([{ path: '', component: DashboardPageComponent }]),
         MessageService,
         ConfirmationService,
+        providePrimeNG(),
       ],
     }).compileComponents();
 
@@ -30,5 +32,6 @@ describe('AppComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('BakeFlow');
     expect(fixture.nativeElement.textContent).toContain('Gestão inteligente');
+    expect(fixture.nativeElement.textContent).toContain('Itens');
   });
 });

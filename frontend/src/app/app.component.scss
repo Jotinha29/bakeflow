@@ -1,10 +1,14 @@
 :host { display: block; min-height: 100vh; }
 .app-shell { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
-.sidebar { background: #17201d; color: #f8f4eb; padding: 2rem 1.25rem; }
+.sidebar { background: #17201d; color: #f8f4eb; display: flex; flex-direction: column; padding: 2rem 1.25rem; }
 .brand { align-items: center; color: inherit; display: flex; font: 700 1.25rem/1 sans-serif; gap: .75rem; margin: 0 .5rem 2.75rem; text-decoration: none; }
 .brand-mark { align-items: center; background: #d99152; border-radius: 10px; color: #17201d; display: inline-flex; height: 2.25rem; justify-content: center; width: 2.25rem; }
 nav a { align-items: center; border-radius: 9px; color: #b9c2bd; display: flex; gap: .75rem; padding: .85rem 1rem; text-decoration: none; }
 nav a.active, nav a:hover { background: #25312d; color: #fff; }
+nav { flex: 1; }
+.language-selector { border-top: 1px solid #34413c; display: grid; gap: .6rem; margin-top: 2rem; padding: 1.25rem .5rem 0; }
+.language-selector label { color: #b9c2bd; font-size: .78rem; }
+.language-selector p-select { width: 100%; }
 .nav-section { color: #78847f; display: block; font-size: .68rem; font-weight: 700; letter-spacing: .12em; margin: 2rem 1rem .65rem; text-transform: uppercase; }
 .content { min-width: 0; }
 header { align-items: center; background: rgba(255,255,255,.86); border-bottom: 1px solid #e6e3dc; display: flex; justify-content: space-between; padding: 1.2rem 2.5rem; }

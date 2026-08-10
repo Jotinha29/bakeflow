@@ -1,58 +1,48 @@
 # BakeFlow
 
-Production and inventory management platform for bakeries and small food manufacturers.
+Plataforma de gestão de estoque e produção para padarias e pequenos fabricantes de alimentos.
 
-BakeFlow is an open-source foundation for reliable stock and production operations. The current release provides the Inventory Catalog: items, batches, hierarchical locations, and optional public product lookup by barcode.
+O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece o catálogo de estoque, com itens, lotes, locais hierárquicos e consulta pública opcional de produtos por código de barras.
 
-## Stack
+## Tecnologias
 
-- Angular 22, TypeScript, SCSS, PrimeNG, and PrimeIcons
-- Spring Boot 4, Java 21, Maven, and Flyway
-- PostgreSQL and Redis
-- Docker Compose and pgAdmin
+- Angular 22, TypeScript, SCSS, PrimeNG e PrimeIcons
+- Spring Boot 4, Java 21, Maven e Flyway
+- PostgreSQL e Redis
+- Docker Compose e pgAdmin
 
-## Architecture
+## Arquitetura
 
-The backend is a modular monolith. Inventory follows DDD and SOLID boundaries: controllers invoke application services, domain objects enforce catalog rules, and persistence and external APIs remain infrastructure details.
+O backend é um monólito modular. O módulo de estoque segue limites inspirados em DDD e SOLID: controllers acionam serviços de aplicação, objetos de domínio aplicam as regras do catálogo e persistência e APIs externas permanecem como detalhes de infraestrutura.
 
 ```text
-Angular
-   ↓
-REST API
-   ↓
-Spring Boot
-   ↓
-Application
-   ↓
-Domain
-   ↓
-Infrastructure
-   ├── PostgreSQL
-   └── Open Food Facts
+Angular → REST API → Spring Boot → Application → Domain → Infrastructure
+                                                        ├── PostgreSQL
+                                                        └── Open Food Facts
 ```
 
-Open Food Facts is isolated behind `ProductInformationGateway`. Its response is mapped to a small BakeFlow-owned contract; timeouts or service failures never prevent manual item registration. Redis caching is intentionally deferred.
+O Open Food Facts fica isolado por `ProductInformationGateway`. A resposta é convertida para um contrato pequeno, pertencente ao BakeFlow; timeouts ou indisponibilidade externa não impedem o cadastro manual. O uso de Redis para cache foi adiado intencionalmente.
 
-## Running locally
+## Execução local
 
-Requirements: Docker and Docker Compose.
+Requisitos: Docker e Docker Compose.
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-The example values are development-only. Change them in your local `.env` when appropriate; `.env` is not versioned.
+Os valores de exemplo servem apenas para desenvolvimento. Altere-os no `.env` local quando necessário; esse arquivo não é versionado.
 
-| Service | URL |
+| Serviço | URL |
 | --- | --- |
 | BakeFlow | http://localhost:4300 |
-| Backend health | http://localhost:8090/actuator/health |
+| Saúde do backend | http://localhost:8090/actuator/health |
 | pgAdmin | http://localhost:5060 |
 
-Connect pgAdmin to host `postgres`, port `5432`, using the PostgreSQL values from `.env`. The `dev` profile loads a small fictional catalog; production does not load demo data.
+No pgAdmin, conecte-se ao host `postgres`, porta `5432`, usando os dados PostgreSQL do `.env`. O perfil `dev` carrega um pequeno catálogo fictício em português; produção não carrega dados de demonstração.
 
-### Development commands
+### Comandos de desenvolvimento
 
 ```bash
 cd frontend
@@ -69,33 +59,43 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-The Angular development server proxies `/api` to `localhost:8090`. The containerized frontend proxies the same path directly to the backend service.
+O servidor Angular encaminha `/api` para `localhost:8090`. No ambiente em containers, o frontend encaminha o mesmo caminho diretamente ao serviço backend.
 
 ## API
 
-Versioned endpoints are available under `/api/v1/items`, `/api/v1/batches`, and `/api/v1/locations`. Resources support paginated filters, create/update, and activation/deactivation without hard deletion. Barcode lookup is available at `/api/v1/product-information/barcode/{barcode}`.
+Os endpoints versionados ficam em `/api/v1/items`, `/api/v1/batches` e `/api/v1/locations`. Os recursos oferecem filtros paginados, criação, atualização e ativação/desativação sem exclusão física. A consulta por código de barras fica em `/api/v1/product-information/barcode/{barcode}`.
 
-## Configuration
+## Internacionalização
 
-Spring profiles are available for `dev`, `test`, and `prod`. Runtime database, Redis, and Open Food Facts settings come from environment variables. Hibernate validates the schema; Flyway owns schema evolution. Actuator exposes only `health` and `info`, with health details hidden.
+O BakeFlow oferece suporte a:
+
+- Português do Brasil (`pt-BR`) — padrão
+- English (`en`)
+
+Toda a interface é internacionalizada e pode ser alterada imediatamente pelo seletor na sidebar. A preferência é persistida localmente no navegador pela chave `bakeflow.language`. Código, contratos técnicos, endpoints, enums e banco de dados permanecem em inglês. Dados cadastrados pelo usuário e informações externas do Open Food Facts não são traduzidos automaticamente.
+
+## Configuração
+
+Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food Facts são configurados por variáveis de ambiente. O Hibernate valida o schema e o Flyway controla sua evolução. O Actuator expõe somente `health` e `info`, sem detalhes sensíveis.
 
 ## Roadmap
 
-- [x] Inventory Catalog
-- [x] Items
-- [x] Batches
-- [x] Hierarchical Locations
-- [x] Open Food Facts integration
-- [ ] Stock Balance
-- [ ] Stock Movements
+- [x] Catálogo de estoque
+- [x] Itens
+- [x] Lotes
+- [x] Locais hierárquicos
+- [x] Integração com Open Food Facts
+- [x] Internacionalização pt-BR e en
+- [ ] Saldo de estoque
+- [ ] Movimentações de estoque
 - [ ] FEFO
-- [ ] Recipes
-- [ ] Production Orders
-- [ ] Authentication & RBAC
-- [ ] Audit Trail
-- [ ] Redis caching
-- [ ] Observability
+- [ ] Receitas
+- [ ] Ordens de produção
+- [ ] Autenticação e RBAC
+- [ ] Auditoria
+- [ ] Cache com Redis
+- [ ] Observabilidade
 
-## License
+## Licença
 
-Licensed under the [MIT License](LICENSE).
+Licenciado sob a [Licença MIT](LICENSE).

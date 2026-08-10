@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -19,6 +19,9 @@ import {
   ProductInformation,
   UnitOfMeasure,
 } from '../../../features/inventory/inventory.models';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { LocalizedNumberPipe } from '../../../core/i18n/localized-number.pipe';
 
 @Component({
   selector: 'app-items-page',
@@ -32,6 +35,8 @@ import {
     TableModule,
     TagModule,
     TooltipModule,
+    TranslatePipe,
+    LocalizedNumberPipe,
   ],
   templateUrl: './items-page.component.html',
   styleUrl: '../inventory-page.scss',
@@ -42,6 +47,7 @@ export class ItemsPageComponent {
   private readonly api = inject(InventoryService);
   private readonly messages = inject(MessageService);
   private readonly confirmations = inject(ConfirmationService);
+  protected readonly i18n = inject(I18nService);
   protected readonly loading = signal(false);
   protected readonly submitting = signal(false);
   protected readonly lookupLoading = signal(false);
@@ -51,17 +57,14 @@ export class ItemsPageComponent {
   protected readonly editing = signal<Item | undefined>(undefined);
   protected readonly product = signal<ProductInformation | undefined>(undefined);
   private applied: Record<string, string | number | boolean | undefined> = { page: 0, size: 10 };
-  protected readonly types = ['RAW_MATERIAL', 'FINISHED_PRODUCT', 'PACKAGING', 'OTHER'].map(
-    (value) => ({ label: this.label(value), value }),
-  );
-  protected readonly units = ['UNIT', 'KG', 'G', 'L', 'ML'].map((value) => ({
-    label: value,
-    value,
-  }));
-  protected readonly statuses = [
-    { label: 'Active', value: true },
-    { label: 'Inactive', value: false },
-  ];
+  protected readonly types = computed(() => ['RAW_MATERIAL', 'FINISHED_PRODUCT', 'PACKAGING', 'OTHER'].map(
+    (value) => ({ label: this.i18n.translate(`enum.itemType.${value}`), value })));
+  protected readonly units = computed(() => ['UNIT', 'KG', 'G', 'L', 'ML'].map((value) =>
+    ({ label: this.i18n.translate(`enum.unit.${value}`), value })));
+  protected readonly statuses = computed(() => [
+    { label: this.i18n.translate('common.active'), value: true },
+    { label: this.i18n.translate('common.inactive'), value: false },
+  ]);
   protected readonly filters = this.fb.group({
     search: [''],
     sku: [''],
@@ -90,7 +93,7 @@ export class ItemsPageComponent {
           this.items.set(r.content);
           this.total.set(r.totalElements);
         },
-        error: () => this.error('Could not load items.'),
+        error: () => this.error(this.i18n.translate('items.loadError')),
       });
   }
   protected applyFilters() {
@@ -150,31 +153,31 @@ export class ItemsPageComponent {
           this.dialog.set(false);
           this.messages.add({
             severity: 'success',
-            summary: 'Success',
-            detail: `Item ${this.editing() ? 'updated' : 'created'} successfully.`,
+            summary: this.i18n.translate('common.success'),
+            detail: this.i18n.translate(this.editing() ? 'items.updated' : 'items.created'),
           });
           this.load();
         },
-        error: (e) => this.error(e.error?.message ?? 'Could not save item.'),
+        error: (e) => this.error(this.i18n.translateError(e, 'items.saveError')),
       });
   }
   protected toggle(item: Item) {
     this.confirmations.confirm({
-      header: `${item.active ? 'Deactivate' : 'Activate'} item?`,
-      message: `${item.name} will ${item.active ? 'no longer' : 'again'} be available for new operations.`,
+      header: this.i18n.translate('items.confirmHeader', { action: this.i18n.translate(item.active ? 'common.deactivate' : 'common.activate') }),
+      message: this.i18n.translate('items.confirmMessage', { name: item.name, availability: this.i18n.translate(item.active ? 'items.unavailable' : 'items.available') }),
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: item.active ? 'Deactivate' : 'Activate',
+      acceptLabel: this.i18n.translate(item.active ? 'common.deactivate' : 'common.activate'),
       accept: () =>
         this.api.setItemActive(item.id, !item.active).subscribe({
           next: () => {
             this.messages.add({
               severity: 'success',
-              summary: 'Success',
-              detail: `Item ${item.active ? 'deactivated' : 'activated'} successfully.`,
+              summary: this.i18n.translate('common.success'),
+              detail: this.i18n.translate(item.active ? 'items.deactivated' : 'items.activated'),
             });
             this.load();
           },
-          error: () => this.error('Could not update item status.'),
+          error: () => this.error(this.i18n.translate('items.statusError')),
         }),
     });
   }
@@ -193,7 +196,7 @@ export class ItemsPageComponent {
             status: 'UNAVAILABLE',
             barcode,
             categories: [],
-            message: 'External product information is unavailable at the moment.',
+            message: this.i18n.translate('items.lookupError'),
           }),
       });
   }
@@ -201,13 +204,8 @@ export class ItemsPageComponent {
     const p = this.product();
     if (p?.name) this.form.controls.name.setValue(p.name);
   }
-  protected label(v: string) {
-    return v
-      .toLowerCase()
-      .replaceAll('_', ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-  }
+  protected label(v: string) { return this.i18n.translate(`enum.itemType.${v}`); }
   private error(detail: string) {
-    this.messages.add({ severity: 'error', summary: 'Something went wrong', detail });
+    this.messages.add({ severity: 'error', summary: this.i18n.translate('common.error'), detail });
   }
 }

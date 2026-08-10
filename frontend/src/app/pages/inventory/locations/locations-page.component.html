@@ -1,32 +1,31 @@
 <header class="page-header">
   <div>
-    <span class="kicker">Inventory catalog</span>
-    <h1>Locations</h1>
+    <span class="kicker">{{ 'inventory.catalog' | translate }}</span><h1>{{ 'locations.title' | translate }}</h1>
   </div>
-  <p-button label="Create location" icon="pi pi-plus" (onClick)="open()" />
+  <p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />
 </header>
 <form class="filter-panel location-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
-    <label for="location-search">Name</label
+    <label for="location-search">{{ 'common.name' | translate }}</label
     ><input pInputText id="location-search" formControlName="search" />
   </div>
   <div class="field">
-    <label for="location-type">Type</label
+    <label for="location-type">{{ 'common.type' | translate }}</label
     ><p-select
       inputId="location-type"
       formControlName="type"
-      [options]="types"
+      [options]="types()"
       optionLabel="label"
       optionValue="value"
       [showClear]="true"
     />
   </div>
   <div class="field">
-    <label for="location-status">Status</label
+    <label for="location-status">{{ 'common.status' | translate }}</label
     ><p-select
       inputId="location-status"
       formControlName="active"
-      [options]="statuses"
+      [options]="statuses()"
       optionLabel="label"
       optionValue="value"
       [showClear]="true"
@@ -35,19 +34,18 @@
   <div class="actions">
     <p-button
       type="button"
-      label="Clear"
+      [label]="'common.clear' | translate"
       severity="secondary"
       [outlined]="true"
       (onClick)="clearFilters()"
-    /><p-button type="submit" label="Filter" icon="pi pi-filter" />
+    /><p-button type="submit" [label]="'common.filter' | translate" icon="pi pi-filter" />
   </div>
 </form>
 <section class="card tree-card">
-  <div class="tree-title"><i class="pi pi-sitemap"></i><strong>Bakery Structure</strong></div>
+  <div class="tree-title"><i class="pi pi-sitemap"></i><strong>{{ 'locations.structure' | translate }}</strong></div>
   @if (!loading() && nodes().length === 0) {
     <div class="empty">
-      <p>No locations registered.</p>
-      <p-button label="Create location" [text]="true" (onClick)="open()" />
+      <p>{{ 'locations.empty' | translate }}</p><p-button [label]="'locations.create' | translate" [text]="true" (onClick)="open()" />
     </div>
   } @else {
     <p-tree [value]="nodes()" [loading]="loading()"
@@ -56,7 +54,7 @@
           <span>{{ node.label }}</span
           ><small>{{ label(node.data.type) }} · {{ node.data.code }}</small
           ><p-tag
-            [value]="node.data.active ? 'Active' : 'Inactive'"
+            [value]="(node.data.active ? 'common.active' : 'common.inactive') | translate"
             [severity]="node.data.active ? 'success' : 'secondary'"
           />
           <div class="node-actions">
@@ -65,24 +63,24 @@
               [rounded]="true"
               [text]="true"
               severity="secondary"
-              pTooltip="View or edit"
-              [attr.aria-label]="'Edit ' + node.label"
+              [pTooltip]="'locations.viewOrEdit' | translate"
+              [attr.aria-label]="('common.edit' | translate) + ' ' + node.label"
               (onClick)="open(node.data)"
             /><p-button
               icon="pi pi-plus"
               [rounded]="true"
               [text]="true"
               severity="secondary"
-              pTooltip="Add child"
-              [attr.aria-label]="'Add child to ' + node.label"
+              [pTooltip]="'locations.addChild' | translate"
+              [attr.aria-label]="('locations.addChild' | translate) + ' ' + node.label"
               (onClick)="open(undefined, node.data)"
             /><p-button
               [icon]="node.data.active ? 'pi pi-ban' : 'pi pi-check'"
               [rounded]="true"
               [text]="true"
               [severity]="node.data.active ? 'danger' : 'success'"
-              [pTooltip]="node.data.active ? 'Deactivate' : 'Activate'"
-              [attr.aria-label]="(node.data.active ? 'Deactivate ' : 'Activate ') + node.label"
+              [pTooltip]="(node.data.active ? 'common.deactivate' : 'common.activate') | translate"
+              [attr.aria-label]="((node.data.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + node.label"
               (onClick)="toggle(node.data)"
             />
           </div></div></ng-template
@@ -90,7 +88,7 @@
   }
 </section>
 <p-dialog
-  [header]="editing() ? 'Edit location' : 'Create location'"
+  [header]="(editing() ? 'locations.edit' : 'locations.create') | translate"
   [visible]="dialog()"
   (visibleChange)="dialog.set($event)"
   [modal]="true"
@@ -98,25 +96,25 @@
   ><form [formGroup]="form" (ngSubmit)="save()">
     <div class="form-grid">
       <div class="field wide">
-        <label for="location-name">Name *</label
+        <label for="location-name">{{ 'common.name' | translate }} *</label
         ><input pInputText id="location-name" formControlName="name" />
       </div>
       <div class="field">
-        <label for="location-code">Code *</label
+        <label for="location-code">{{ 'common.code' | translate }} *</label
         ><input pInputText id="location-code" formControlName="code" />
       </div>
       <div class="field">
-        <label for="form-location-type">Type *</label
+        <label for="form-location-type">{{ 'common.type' | translate }} *</label
         ><p-select
           inputId="form-location-type"
           formControlName="type"
-          [options]="types"
+          [options]="types()"
           optionLabel="label"
           optionValue="value"
         />
       </div>
       <div class="field wide">
-        <label for="location-parent">Parent location</label
+        <label for="location-parent">{{ 'locations.parent' | translate }}</label
         ><p-select
           inputId="location-parent"
           formControlName="parentId"
@@ -131,13 +129,13 @@
     <div class="dialog-actions">
       <p-button
         type="button"
-        label="Cancel"
+        [label]="'common.cancel' | translate"
         severity="secondary"
         [outlined]="true"
         (onClick)="dialog.set(false)"
       /><p-button
         type="submit"
-        label="Save"
+        [label]="'common.save' | translate"
         icon="pi pi-check"
         [loading]="submitting()"
         [disabled]="form.invalid || submitting()"

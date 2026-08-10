@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -12,6 +12,9 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { InventoryService } from '../../../features/inventory/inventory.service';
 import { Batch, BatchInput, Item } from '../../../features/inventory/inventory.models';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { LocalizedDatePipe } from '../../../core/i18n/localized-date.pipe';
 @Component({
   selector: 'app-batches-page',
   imports: [
@@ -24,6 +27,7 @@ import { Batch, BatchInput, Item } from '../../../features/inventory/inventory.m
     TableModule,
     TagModule,
     TooltipModule,
+    TranslatePipe, LocalizedDatePipe,
   ],
   templateUrl: './batches-page.component.html',
   styleUrl: '../inventory-page.scss',
@@ -34,6 +38,7 @@ export class BatchesPageComponent {
   private api = inject(InventoryService);
   private messages = inject(MessageService);
   private confirmations = inject(ConfirmationService);
+  protected i18n = inject(I18nService);
   protected loading = signal(false);
   protected submitting = signal(false);
   protected batches = signal<Batch[]>([]);
@@ -42,10 +47,8 @@ export class BatchesPageComponent {
   protected dialog = signal(false);
   protected editing = signal<Batch | undefined>(undefined);
   private applied: Record<string, string | number | boolean | undefined> = { page: 0, size: 10 };
-  protected statuses = [
-    { label: 'Active', value: true },
-    { label: 'Inactive', value: false },
-  ];
+  protected statuses = computed(() => [{ label: this.i18n.translate('common.active'), value: true },
+    { label: this.i18n.translate('common.inactive'), value: false }]);
   protected filters = this.fb.group({
     itemId: [''],
     code: [''],
@@ -76,7 +79,7 @@ export class BatchesPageComponent {
           this.batches.set(r.content);
           this.total.set(r.totalElements);
         },
-        error: () => this.error('Could not load batches.'),
+        error: () => this.error(this.i18n.translate('batches.loadError')),
       });
   }
   protected applyFilters() {
@@ -146,29 +149,27 @@ export class BatchesPageComponent {
           this.dialog.set(false);
           this.messages.add({
             severity: 'success',
-            summary: 'Success',
-            detail: `Batch ${this.editing() ? 'updated' : 'created'} successfully.`,
+            summary: this.i18n.translate('common.success'), detail: this.i18n.translate(this.editing() ? 'batches.updated' : 'batches.created'),
           });
           this.load();
         },
-        error: (e) => this.error(e.error?.message ?? 'Could not save batch.'),
+        error: (e) => this.error(this.i18n.translateError(e, 'batches.saveError')),
       });
   }
   protected toggle(b: Batch) {
     this.confirmations.confirm({
-      header: `${b.active ? 'Deactivate' : 'Activate'} batch?`,
-      message: `Batch ${b.code} will be ${b.active ? 'unavailable' : 'available'} for new operations.`,
+      header: this.i18n.translate('batches.confirmHeader', { action: this.i18n.translate(b.active ? 'common.deactivate' : 'common.activate') }),
+      message: this.i18n.translate('batches.confirmMessage', { code: b.code, availability: this.i18n.translate(b.active ? 'items.unavailable' : 'items.available') }),
       accept: () =>
         this.api.setBatchActive(b.id, !b.active).subscribe({
           next: () => {
             this.messages.add({
               severity: 'success',
-              summary: 'Success',
-              detail: `Batch ${b.active ? 'deactivated' : 'activated'} successfully.`,
+              summary: this.i18n.translate('common.success'), detail: this.i18n.translate(b.active ? 'batches.deactivated' : 'batches.activated'),
             });
             this.load();
           },
-          error: () => this.error('Could not update batch status.'),
+          error: () => this.error(this.i18n.translate('batches.statusError')),
         }),
     });
   }
@@ -178,6 +179,6 @@ export class BatchesPageComponent {
       : undefined;
   }
   private error(detail: string) {
-    this.messages.add({ severity: 'error', summary: 'Something went wrong', detail });
+    this.messages.add({ severity: 'error', summary: this.i18n.translate('common.error'), detail });
   }
 }
