@@ -14,6 +14,11 @@
       <a routerLink="/inventory/batches" routerLinkActive="active"><i class="pi pi-tags" aria-hidden="true"></i>{{ 'nav.batches' | translate }}</a>
       <a routerLink="/inventory/locations" routerLinkActive="active"><i class="pi pi-sitemap" aria-hidden="true"></i>{{ 'nav.locations' | translate }}</a>
     </nav>
+    <nav class="production-nav" [attr.aria-label]="'nav.production' | translate">
+      <span class="nav-section">{{ 'nav.production' | translate }}</span>
+      <a routerLink="/recipes" routerLinkActive="active"><i class="pi pi-book" aria-hidden="true"></i>{{ 'nav.recipes' | translate }}</a>
+      <a routerLink="/production-orders" routerLinkActive="active"><i class="pi pi-clipboard" aria-hidden="true"></i>{{ 'nav.productionOrders' | translate }}</a>
+    </nav>
     <div class="language-selector"><label for="language"><i class="pi pi-globe"></i> {{ 'language.label' | translate }}</label>
       <p-select inputId="language" [options]="languages" optionLabel="label" optionValue="value" [ngModel]="i18n.language()" (ngModelChange)="changeLanguage($event)" appendTo="body" />
     </div>

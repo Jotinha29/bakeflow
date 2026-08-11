@@ -46,4 +46,12 @@ describe('I18nService', () => {
     service.setLanguage('en');
     expect(itemName).toBe('Farinha de trigo');
   });
+  it('translates production navigation and statuses in both languages', () => {
+    const service = TestBed.inject(I18nService);
+    expect(service.translate('nav.recipes')).toBe('Receitas');
+    expect(service.translate('enum.productionStatus.IN_PROGRESS')).toBe('Em produção');
+    service.setLanguage('en');
+    expect(service.translate('nav.productionOrders')).toBe('Production Orders');
+    expect(service.translate('enum.productionStatus.IN_PROGRESS')).toBe('In progress');
+  });
 });

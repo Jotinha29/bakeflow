@@ -29,6 +29,7 @@ describe('AppComponent', () => {
 
     const request = TestBed.inject(HttpTestingController).expectOne('/api/system/status');
     request.flush({ status: 'UP', postgres: 'UP', redis: 'UP' });
+    TestBed.inject(HttpTestingController).expectOne('/api/v1/production-dashboard').flush({ planned: 0, inProgress: 0, completedToday: 0, recent: [] });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('BakeFlow');
     expect(fixture.nativeElement.textContent).toContain('Gestão inteligente');

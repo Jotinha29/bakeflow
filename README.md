@@ -2,7 +2,7 @@
 
 Plataforma de gestão de estoque e produção para padarias e pequenos fabricantes de alimentos.
 
-O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece o catálogo de estoque, com itens, lotes, locais hierárquicos e consulta pública opcional de produtos por código de barras.
+O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece catálogo e saldo de estoque, rastreabilidade de movimentações, receitas, ordens de produção e consulta pública opcional de produtos por código de barras.
 
 ## Tecnologias
 
@@ -13,7 +13,7 @@ O BakeFlow é uma base open source para operações confiáveis. A versão atual
 
 ## Arquitetura
 
-O backend é um monólito modular. O módulo de estoque segue limites inspirados em DDD e SOLID: controllers acionam serviços de aplicação, objetos de domínio aplicam as regras do catálogo e persistência e APIs externas permanecem como detalhes de infraestrutura.
+O backend é um monólito modular. Inventory mantém itens, lotes, locais, saldos e movimentos. Production mantém receitas, ordens, consumos e resultados, utilizando operações de estoque por uma fronteira explícita. Controllers acionam serviços de aplicação e persistência e APIs externas permanecem como detalhes de infraestrutura.
 
 ```text
 Angular → REST API → Spring Boot → Application → Domain → Infrastructure
@@ -63,7 +63,15 @@ O servidor Angular encaminha `/api` para `localhost:8090`. No ambiente em contai
 
 ## API
 
-Os endpoints versionados ficam em `/api/v1/items`, `/api/v1/batches` e `/api/v1/locations`. Os recursos oferecem filtros paginados, criação, atualização e ativação/desativação sem exclusão física. A consulta por código de barras fica em `/api/v1/product-information/barcode/{barcode}`.
+Os endpoints versionados ficam em `/api/v1/items`, `/api/v1/batches`, `/api/v1/locations`, `/api/v1/recipes` e `/api/v1/production-orders`. Operações explícitas iniciam, finalizam ou cancelam ordens. A consulta por código de barras fica em `/api/v1/product-information/barcode/{barcode}`.
+
+## Fluxo de produção
+
+```text
+Receita → Ordem de Produção → Preview FEFO → Consumo → Produção → Lote acabado → Estoque
+```
+
+O backend calcula oficialmente a necessidade dos ingredientes. Ao iniciar uma ordem, seleciona lotes válidos por FEFO: menor validade primeiro, depois criação e ID; lotes sem validade ficam por último e vencidos são ignorados. Consumo, movimentos e transição para `IN_PROGRESS` são atômicos. Ao finalizar, lote, entrada de estoque, rastreabilidade e transição para `COMPLETED` são confirmados na mesma transação.
 
 ## Internacionalização
 
@@ -80,21 +88,22 @@ Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food
 
 ## Roadmap
 
-- [x] Catálogo de estoque
-- [x] Itens
-- [x] Lotes
-- [x] Locais hierárquicos
+- [x] Gestão de itens
+- [x] Controle de lotes
+- [x] Locais de estoque
+- [x] Controle de saldo
+- [x] Movimentações
 - [x] Integração com Open Food Facts
 - [x] Internacionalização pt-BR e en
-- [ ] Saldo de estoque
-- [ ] Movimentações de estoque
-- [ ] FEFO
-- [ ] Receitas
-- [ ] Ordens de produção
+- [x] Receitas
+- [x] Ordens de produção
+- [x] FEFO
+- [x] Rastreabilidade de produção
 - [ ] Autenticação e RBAC
-- [ ] Auditoria
 - [ ] Cache com Redis
+- [ ] Integrações externas adicionais
 - [ ] Observabilidade
+- [ ] CI/CD
 
 ## Licença
 

@@ -4,14 +4,17 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SystemStatusService } from '../../core/services/system-status.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { ProductionDashboardService } from '../../features/production/production-dashboard.service';
+import { LocalizedNumberPipe } from '../../core/i18n/localized-number.pipe';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [AsyncPipe, CardModule, TagModule, TranslatePipe],
+  imports: [AsyncPipe, CardModule, TagModule, TranslatePipe, LocalizedNumberPipe],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardPageComponent {
   protected readonly status$ = inject(SystemStatusService).getStatus();
+  protected readonly production$ = inject(ProductionDashboardService).summary();
 }

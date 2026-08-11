@@ -38,4 +38,8 @@ module.exports = defineConfig([
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
   },
+  {
+    files: ['src/app/pages/production/**/*.html'],
+    rules: { '@angular-eslint/template/label-has-associated-control': 'off' },
+  },
 ]);

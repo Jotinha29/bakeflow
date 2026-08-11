@@ -26,3 +26,9 @@
     </div>
   </section>
 }
+@if (production$ | async; as production) {
+  <section class="status-panel production-panel" aria-labelledby="production-title"><div><span class="kicker">{{'dashboard.production'|translate}}</span><h2 id="production-title">{{'dashboard.productionOverview'|translate}}</h2></div>
+    <div class="status-grid"><p-card><span>{{'dashboard.plannedOrders'|translate}}</span><strong>{{production.planned|localizedNumber}}</strong></p-card><p-card><span>{{'dashboard.inProgress'|translate}}</span><strong>{{production.inProgress|localizedNumber}}</strong></p-card><p-card><span>{{'dashboard.completedToday'|translate}}</span><strong>{{production.completedToday|localizedNumber}}</strong></p-card></div>
+    <h3>{{'dashboard.recentProduction'|translate}}</h3><div class="recent-list">@for(order of production.recent;track order.id){<div><strong>{{order.code}}</strong><span>{{order.outputItemName}} · {{order.plannedQuantity|localizedNumber}} {{'enum.unit.'+order.unit|translate}}</span><p-tag [value]="'enum.productionStatus.'+order.status|translate"/></div>}@empty{<p>{{'dashboard.noRecentProduction'|translate}}</p>}</div>
+  </section>
+}
