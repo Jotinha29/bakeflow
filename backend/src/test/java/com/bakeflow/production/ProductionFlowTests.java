@@ -39,6 +39,7 @@ class ProductionFlowTests {
         var completed=service.complete(order.id(),new CompleteInput(new BigDecimal("485"),location,"Perda de modelagem",null));
         assertThat(completed.status()).isEqualTo(ProductionStatus.COMPLETED);assertThat(completed.output().batchCode()).startsWith("PROD-");
         assertThat(jdbc.queryForObject("SELECT quantity FROM stock_balances WHERE batch_id=?",BigDecimal.class,completed.output().batchId())).isEqualByComparingTo("485");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM audit_events WHERE entity_id=?",Integer.class,order.id())).isEqualTo(2);
         assertThatThrownBy(()->service.complete(order.id(),new CompleteInput(BigDecimal.ONE,location,null,null))).isInstanceOf(DomainException.class);
     }
     @Test void insufficientIngredientRollsBackWithoutAnyConsumption(){

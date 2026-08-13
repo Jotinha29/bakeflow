@@ -33,5 +33,18 @@ server:
 
 open-food-facts:
   base-url: ${OPEN_FOOD_FACTS_BASE_URL:https://world.openfoodfacts.org}
-  connect-timeout: 2s
-  read-timeout: 4s
+  connect-timeout: ${OPEN_FOOD_FACTS_CONNECT_TIMEOUT:2s}
+  read-timeout: ${OPEN_FOOD_FACTS_READ_TIMEOUT:4s}
+  cache-ttl: ${OPEN_FOOD_FACTS_CACHE_TTL:24h}
+brasil-api:
+  base-url: ${BRASIL_API_BASE_URL:https://brasilapi.com.br}
+  connect-timeout: ${BRASIL_API_CONNECT_TIMEOUT:2s}
+  read-timeout: ${BRASIL_API_READ_TIMEOUT:4s}
+  cache-ttl: ${BRASIL_API_CACHE_TTL:12h}
+integrations:
+  stale-ttl: ${EXTERNAL_CACHE_STALE_TTL:7d}
+  retry-attempts: ${EXTERNAL_API_RETRY_ATTEMPTS:2}
+  circuit-failure-threshold: ${EXTERNAL_API_CIRCUIT_FAILURE_THRESHOLD:3}
+  circuit-open-duration: ${EXTERNAL_API_CIRCUIT_OPEN_DURATION:30s}
+  rate-limit: ${EXTERNAL_API_RATE_LIMIT:30}
+  rate-window: ${EXTERNAL_API_RATE_WINDOW:1m}

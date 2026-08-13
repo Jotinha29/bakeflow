@@ -1,12 +1,6 @@
 package com.bakeflow.inventory.infrastructure.external;
-import com.bakeflow.inventory.application.ProductInformationGateway;import com.bakeflow.inventory.application.InventoryDtos.*;import java.util.*;import org.springframework.stereotype.Component;import org.springframework.web.client.*;import tools.jackson.databind.JsonNode;
+import com.bakeflow.integration.application.IntegrationService;import com.bakeflow.integration.application.IntegrationDtos.ResultStatus;import com.bakeflow.inventory.application.ProductInformationGateway;import com.bakeflow.inventory.application.InventoryDtos.*;import org.springframework.stereotype.Component;
 @Component public class OpenFoodFactsClient implements ProductInformationGateway{
- private final RestClient client;OpenFoodFactsClient(RestClient openFoodFactsRestClient){client=openFoodFactsRestClient;}
- public ProductInformation findByBarcode(String barcode){
-  if(barcode==null||barcode.isBlank())return unavailable(barcode,"A barcode is required.");
-  try{JsonNode root=client.get().uri("/api/v2/product/{barcode}.json?fields=code,product_name,brands,image_front_url,quantity,categories_tags",barcode).retrieve().body(JsonNode.class);if(root==null||root.path("status").asInt()==0)return new ProductInformation(LookupStatus.NOT_FOUND,barcode,null,null,null,null,List.of(),"No product was found for this barcode.");JsonNode p=root.path("product");List<String>categories=new ArrayList<>();p.path("categories_tags").forEach(n->categories.add(n.asText().replaceFirst("^[a-z]{2}:","").replace('-', ' ')));return new ProductInformation(LookupStatus.FOUND,barcode,text(p,"product_name"),text(p,"brands"),text(p,"image_front_url"),text(p,"quantity"),categories,null);
-  }catch(RuntimeException e){return unavailable(barcode,"External product information is unavailable at the moment.");}
- }
- private String text(JsonNode n,String field){String value=n.path(field).asText();return value.isBlank()?null:value;}
- private ProductInformation unavailable(String barcode,String message){return new ProductInformation(LookupStatus.UNAVAILABLE,barcode,null,null,null,null,List.of(),message);}
+ private final IntegrationService integrations;OpenFoodFactsClient(IntegrationService integrations){this.integrations=integrations;}
+ public ProductInformation findByBarcode(String barcode){var p=integrations.product(barcode,"legacy");return new ProductInformation(p.status()==ResultStatus.FOUND?LookupStatus.FOUND:p.status()==ResultStatus.NOT_FOUND?LookupStatus.NOT_FOUND:LookupStatus.UNAVAILABLE,p.barcode(),p.name(),p.brand(),p.imageUrl(),p.quantity(),p.categories(),p.errorCode());}
 }

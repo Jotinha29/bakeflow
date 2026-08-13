@@ -8,7 +8,7 @@ O BakeFlow é uma base open source para operações confiáveis. A versão atual
 
 - Angular 22, TypeScript, SCSS, PrimeNG e PrimeIcons
 - Spring Boot 4, Java 21, Maven e Flyway
-- PostgreSQL e Redis
+- PostgreSQL e Redis para cache, stale fallback e rate limiting
 - Docker Compose e pgAdmin
 
 ## Arquitetura
@@ -18,10 +18,20 @@ O backend é um monólito modular. Inventory mantém itens, lotes, locais, saldo
 ```text
 Angular → REST API → Spring Boot → Application → Domain → Infrastructure
                                                         ├── PostgreSQL
-                                                        └── Open Food Facts
+                                                        ├── Redis
+                                                        ├── Open Food Facts
+                                                        └── BrasilAPI
 ```
 
-O Open Food Facts fica isolado por `ProductInformationGateway`. A resposta é convertida para um contrato pequeno, pertencente ao BakeFlow; timeouts ou indisponibilidade externa não impedem o cadastro manual. O uso de Redis para cache foi adiado intencionalmente.
+As integrações ficam isoladas por adapters e retornam contratos pequenos pertencentes ao BakeFlow. Nenhuma consulta externa persiste itens ou empresas automaticamente.
+
+```text
+Angular → Spring Boot → Integration Service → Cache Service → Redis
+                                                     ├── HIT → resposta
+                                                     └── MISS → API externa
+```
+
+O caminho externo aplica timeout, retry apenas para falhas transitórias, circuit breaker local por provedor e fallback stale identificado por `fresh: false`. O breaker é local porque o BakeFlow é um monólito de instância única; distribuir esse estado aumentaria a complexidade sem benefício atual. Um lock curto por recurso no processo evita stampede nesta topologia. Redis nunca substitui o PostgreSQL como fonte de verdade.
 
 ## Execução local
 
@@ -37,7 +47,8 @@ Os valores de exemplo servem apenas para desenvolvimento. Altere-os no `.env` lo
 | Serviço | URL |
 | --- | --- |
 | BakeFlow | http://localhost:4300 |
-| Saúde do backend | http://localhost:8090/actuator/health |
+| Liveness | http://localhost:8090/api/system/health/live |
+| Readiness | http://localhost:8090/api/system/health/ready |
 | pgAdmin | http://localhost:5060 |
 
 No pgAdmin, conecte-se ao host `postgres`, porta `5432`, usando os dados PostgreSQL do `.env`. O perfil `dev` carrega um pequeno catálogo fictício em português; produção não carrega dados de demonstração.
@@ -63,7 +74,18 @@ O servidor Angular encaminha `/api` para `localhost:8090`. No ambiente em contai
 
 ## API
 
-Os endpoints versionados ficam em `/api/v1/items`, `/api/v1/batches`, `/api/v1/locations`, `/api/v1/recipes` e `/api/v1/production-orders`. Operações explícitas iniciam, finalizam ou cancelam ordens. A consulta por código de barras fica em `/api/v1/product-information/barcode/{barcode}`.
+Os endpoints versionados ficam em `/api/v1/items`, `/api/v1/batches`, `/api/v1/locations`, `/api/v1/recipes` e `/api/v1/production-orders`. Operações explícitas iniciam, finalizam ou cancelam ordens.
+
+## Integrações e resiliência
+
+| Provedor | Endpoint interno | Cache fresh | Uso |
+| --- | --- | --- | --- |
+| Open Food Facts | `GET /api/v1/integrations/product/{barcode}` | 24 h | Produto por código de barras |
+| BrasilAPI | `GET /api/v1/integrations/company/{cnpj}` | 12 h | Empresa por CNPJ |
+
+Os TTLs são configuráveis. O valor permanece retido por mais sete dias para fallback stale quando o provedor falha, sempre indicado no contrato. As chamadas possuem timeouts de conexão e leitura, no máximo duas tentativas e circuit breaker. Um fixed window no Redis limita apenas endpoints externos e responde HTTP 429. As chaves seguem `bakeflow:integration:{provider}:{resource}:{id}`, `bakeflow:ratelimit:{resource}:{client}:{window}` e marcadores fresh com sufixo `:fresh`.
+
+Cada resposta inclui `X-Request-ID`, aceitando somente identificadores de formato seguro enviados pelo cliente. `/api/v1/system/integrations` informa configuração, circuitos e disponibilidade do Redis sem consultar provedores. Eventos de estoque decorrentes da produção e transições das ordens são persistidos transacionalmente em `audit_events`, separados dos logs técnicos.
 
 ## Fluxo de produção
 
@@ -86,6 +108,17 @@ Toda a interface é internacionalizada e pode ser alterada imediatamente pelo se
 
 Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food Facts são configurados por variáveis de ambiente. O Hibernate valida o schema e o Flyway controla sua evolução. O Actuator expõe somente `health` e `info`, sem detalhes sensíveis.
 
+## Destaques técnicos
+
+- monólito modular e migrations Flyway;
+- estoque transacional, controle de concorrência e FEFO;
+- rastreabilidade de produção e auditoria de negócio;
+- internacionalização pt-BR/en;
+- Open Food Facts e BrasilAPI com parsing defensivo;
+- cache-aside Redis, TTL, fallback stale e proteção contra stampede;
+- timeout, retry, circuit breaker e rate limiting;
+- testes automatizados e Docker Compose.
+
 ## Roadmap
 
 - [x] Gestão de itens
@@ -100,9 +133,9 @@ Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food
 - [x] FEFO
 - [x] Rastreabilidade de produção
 - [ ] Autenticação e RBAC
-- [ ] Cache com Redis
-- [ ] Integrações externas adicionais
-- [ ] Observabilidade
+- [x] Cache com Redis
+- [x] Integração com BrasilAPI
+- [x] Resiliência e observabilidade básica
 - [ ] CI/CD
 
 ## Licença

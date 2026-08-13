@@ -3,6 +3,7 @@ package com.bakeflow.production.application;
 import static com.bakeflow.production.application.ProductionDtos.*;
 
 import com.bakeflow.inventory.application.InventoryStockOperations;
+import com.bakeflow.audit.AuditService;
 import com.bakeflow.inventory.application.InventoryStockOperations.Requirement;
 import com.bakeflow.inventory.domain.DomainException;
 import com.bakeflow.inventory.domain.UnitOfMeasure;
@@ -28,7 +29,8 @@ public class ProductionService {
     private static final Logger log = LoggerFactory.getLogger(ProductionService.class);
     private final JdbcTemplate jdbc;
     private final InventoryStockOperations stock;
-    public ProductionService(JdbcTemplate jdbc, InventoryStockOperations stock) { this.jdbc = jdbc; this.stock = stock; }
+    private final AuditService audit;
+    public ProductionService(JdbcTemplate jdbc, InventoryStockOperations stock, AuditService audit) { this.jdbc = jdbc; this.stock = stock; this.audit = audit; }
 
     public RecipeView createRecipe(RecipeInput input) { return saveRecipe(UUID.randomUUID(), input, true); }
     public RecipeView updateRecipe(UUID id, RecipeInput input) { requireExists("recipes", id, "RECIPE_NOT_FOUND"); return saveRecipe(id, input, false); }
@@ -77,6 +79,7 @@ public class ProductionService {
         consumed.forEach(a->jdbc.update("INSERT INTO production_consumptions(id,production_order_id,item_id,batch_id,location_id,quantity,created_at) VALUES(?,?,?,?,?,?,?)",
             UUID.randomUUID(),id,a.itemId(),a.batchId(),a.locationId(),a.quantity(),now));
         jdbc.update("UPDATE production_orders SET status='IN_PROGRESS',started_at=?,updated_at=? WHERE id=?",now,now,id);
+        audit.record("PRODUCTION_ORDER_STARTED", "PRODUCTION_ORDER", id, "Production order started", Map.of("productionOrderCode",base.code(),"plannedQuantity",base.plannedQuantity().toPlainString()));
         log.info("Production order started: {}",base.code()); return order(id,true);
     }
     public ProductionOrderView complete(UUID id, CompleteInput input) {
@@ -93,11 +96,13 @@ public class ProductionService {
             UUID.randomUUID(),id,recipe.outputItemId(),batchId,input.destinationLocationId(),actual,now);
         jdbc.update("UPDATE production_orders SET status='COMPLETED',actual_quantity=?,destination_location_id=?,difference_reason=?,notes=COALESCE(?,notes),completed_at=?,updated_at=? WHERE id=?",
             actual,input.destinationLocationId(),clean(input.differenceReason()),clean(input.notes()),now,now,id);
+        audit.record("PRODUCTION_ORDER_COMPLETED", "PRODUCTION_ORDER", id, "Production order completed", Map.of("productionOrderCode",base.code(),"plannedQuantity",base.plannedQuantity().toPlainString(),"actualQuantity",actual.toPlainString()));
         log.info("Production order completed: {}",base.code()); return order(id,true);
     }
     public ProductionOrderView cancel(UUID id) {
         OrderBase base=lockOrder(id); if(base.status()!=ProductionStatus.PLANNED) throw new DomainException("INVALID_PRODUCTION_TRANSITION");
         jdbc.update("UPDATE production_orders SET status='CANCELLED',updated_at=? WHERE id=?",Timestamp.from(Instant.now()),id);
+        audit.record("PRODUCTION_ORDER_CANCELLED", "PRODUCTION_ORDER", id, "Production order cancelled", Map.of("productionOrderCode",base.code()));
         log.info("Production order cancelled: {}",base.code()); return order(id,true);
     }
 

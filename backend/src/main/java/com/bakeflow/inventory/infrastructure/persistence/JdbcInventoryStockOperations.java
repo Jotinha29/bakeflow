@@ -1,6 +1,7 @@
 package com.bakeflow.inventory.infrastructure.persistence;
 
 import com.bakeflow.inventory.application.InventoryStockOperations;
+import com.bakeflow.audit.AuditService;
 import com.bakeflow.inventory.domain.DomainException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdbcInventoryStockOperations implements InventoryStockOperations {
     private final JdbcTemplate jdbc;
-    public JdbcInventoryStockOperations(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    private final AuditService audit;
+    public JdbcInventoryStockOperations(JdbcTemplate jdbc, AuditService audit) { this.jdbc = jdbc; this.audit = audit; }
 
     @Override public List<Availability> preview(List<Requirement> requirements) {
         return requirements.stream().map(requirement -> availability(requirement, false)).toList();
@@ -32,6 +34,7 @@ public class JdbcInventoryStockOperations implements InventoryStockOperations {
                 allocation.quantity(), Timestamp.from(Instant.now()), allocation.batchId(), allocation.locationId(), allocation.quantity());
             if (changed != 1) throw new DomainException("CONCURRENT_MODIFICATION");
             movement(allocation, "PRODUCTION_CONSUMPTION", reference);
+            audit.record("STOCK_EXIT_CREATED", "STOCK_MOVEMENT", allocation.itemId(), "Stock consumed by production", java.util.Map.of("reference", reference, "quantity", allocation.quantity().toPlainString()));
         });
         return consumed;
     }
@@ -43,6 +46,7 @@ public class JdbcInventoryStockOperations implements InventoryStockOperations {
         if (changed == 0) jdbc.update("INSERT INTO stock_balances(id,item_id,batch_id,location_id,quantity,version,updated_at) VALUES(?,?,?,?,?,0,?)",
             UUID.randomUUID(), itemId, batchId, locationId, quantity, Timestamp.from(Instant.now()));
         movement(new Allocation(itemId, "", batchId, "", locationId, "", null, quantity), "PRODUCTION_OUTPUT", reference);
+        audit.record("STOCK_ENTRY_CREATED", "STOCK_MOVEMENT", itemId, "Finished product received into stock", java.util.Map.of("reference", reference, "quantity", quantity.toPlainString()));
     }
 
     private Availability availability(Requirement requirement, boolean lock) {

@@ -32,6 +32,16 @@ public class SystemStatusController {
         return ResponseEntity.ok(status);
     }
 
+    @GetMapping("/health/live")
+    public Map<String,String> live() { return Map.of("status", "UP"); }
+
+    @GetMapping("/health/ready")
+    public ResponseEntity<Map<String,String>> ready() {
+        String postgres=postgresStatus(); String redis=redisStatus();
+        Map<String,String> body=Map.of("status", "UP".equals(postgres)&&"UP".equals(redis)?"UP":"DOWN", "postgres",postgres,"redis",redis);
+        return "UP".equals(body.get("status"))?ResponseEntity.ok(body):ResponseEntity.status(503).body(body);
+    }
+
     private String postgresStatus() {
         try (Connection connection = dataSource.getConnection()) {
             return connection.isValid(2) ? "UP" : "DOWN";
