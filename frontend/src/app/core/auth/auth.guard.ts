@@ -1,0 +1,2 @@
+import { inject } from '@angular/core';import { CanActivateFn,Router } from '@angular/router';import { catchError,map,of } from 'rxjs';import { AuthService } from './auth.service';
+export const authGuard:CanActivateFn=()=>{const a=inject(AuthService),r=inject(Router);if(a.user())return true;return a.restore().pipe(map(()=>true),catchError(()=>of(r.createUrlTree(['/login']))));};export const permissionGuard=(permission:string):CanActivateFn=>()=>{const a=inject(AuthService),r=inject(Router);return a.can(permission)||r.createUrlTree(['/']);};

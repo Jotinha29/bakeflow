@@ -48,3 +48,12 @@ integrations:
   circuit-open-duration: ${EXTERNAL_API_CIRCUIT_OPEN_DURATION:30s}
   rate-limit: ${EXTERNAL_API_RATE_LIMIT:30}
   rate-window: ${EXTERNAL_API_RATE_WINDOW:1m}
+security:
+  jwt-secret: ${JWT_SECRET_KEY}
+  access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
+  refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:30d}
+  cookie-secure: ${AUTH_COOKIE_SECURE:false}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4300}
+  login-rate-limit: ${LOGIN_RATE_LIMIT:10}
+  demo-admin-email: ${DEMO_ADMIN_EMAIL:admin@bakeflow.local}
+  demo-admin-password: ${DEMO_ADMIN_PASSWORD:}

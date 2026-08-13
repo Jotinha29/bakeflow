@@ -33,6 +33,6 @@ describe('AppComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('BakeFlow');
     expect(fixture.nativeElement.textContent).toContain('Gestão inteligente');
-    expect(fixture.nativeElement.textContent).toContain('Itens');
+    expect(fixture.nativeElement.textContent).toContain('Produção');
   });
 });

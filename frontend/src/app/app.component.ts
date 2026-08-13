@@ -9,6 +9,7 @@ import { I18nService } from './core/i18n/i18n.service';
 import { TranslatePipe } from './core/i18n/translate.pipe';
 import { Language, primeTranslations } from './core/i18n/translations';
 import { Translation } from 'primeng/api';
+import { AuthService } from './core/auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ import { Translation } from 'primeng/api';
 })
 export class AppComponent {
   protected readonly i18n = inject(I18nService);
+  protected readonly auth = inject(AuthService);
   protected readonly languages: { label: string; value: Language }[] = [
     { label: 'Português (Brasil)', value: 'pt-BR' }, { label: 'English', value: 'en' },
   ];

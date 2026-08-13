@@ -16,6 +16,7 @@ header { align-items: center; background: rgba(255,255,255,.86); border-bottom: 
 .environment { align-items: center; color: #4e5c56; display: flex; font-size: .85rem; gap: .5rem; }
 .environment span { background: #69a47f; border-radius: 50%; height: .5rem; width: .5rem; }
 main { padding: clamp(1.5rem, 4vw, 4rem); }
+.account-link{align-items:center;color:#b9c2bd;display:flex;gap:.6rem;padding:.8rem;text-decoration:none}.form-grid{display:grid;gap:.8rem}.form-grid input,.form-grid select,.section-header input{border:1px solid #cfd5d1;border-radius:7px;padding:.7rem}.session,.actions{align-items:center;display:flex;gap:1rem;justify-content:space-between;margin:.7rem 0}
 @media (max-width: 720px) {
   .app-shell { grid-template-columns: 1fr; }
   .sidebar { padding: 1rem; }

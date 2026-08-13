@@ -119,6 +119,26 @@ Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food
 - timeout, retry, circuit breaker e rate limiting;
 - testes automatizados e Docker Compose.
 
+## Autenticação e controle de acesso
+
+O backend é a autoridade de acesso por Spring Security. O login gera JWT HS256 de 15 minutos mantido apenas em memória pela SPA. O refresh token é aleatório, persistido somente como SHA-256, enviado em cookie HttpOnly/SameSite Strict e rotacionado a cada uso; reutilização revoga toda a família. Senhas usam Argon2id e aceitam passphrases de 8 a 128 caracteres. Endpoints pessoais validam ownership e operações baseadas no cookie validam a origem, complementando SameSite. Em produção, configure cookie Secure e um segredo JWT aleatório com pelo menos 32 caracteres.
+
+| Recurso | Admin | Gestor | Operador | Consulta |
+| --- | --- | --- | --- | --- |
+| Consultar estoque | ✓ | ✓ | ✓ | ✓ |
+| Movimentar estoque | ✓ | ✓ | ✓ | — |
+| Produção | ✓ | ✓ | operar | leitura |
+| Receitas | ✓ | ✓ | leitura | leitura |
+| Usuários | ✓ | — | — | — |
+| Auditoria | ✓ | ✓ | — | — |
+
+O perfil `dev` cria o administrador somente quando o banco está vazio e `DEMO_ADMIN_PASSWORD` foi informado. O perfil de produção nunca cria credenciais padrão. Ao inativar um usuário, todos os refresh tokens são revogados; o access token curto existente expira naturalmente.
+
+```text
+Angular → JWT Bearer → Spring Security → Application → PostgreSQL
+               Refresh → HttpOnly Cookie → rotação e revogação
+```
+
 ## Roadmap
 
 - [x] Gestão de itens
@@ -132,7 +152,7 @@ Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food
 - [x] Ordens de produção
 - [x] FEFO
 - [x] Rastreabilidade de produção
-- [ ] Autenticação e RBAC
+- [x] Autenticação e RBAC
 - [x] Cache com Redis
 - [x] Integração com BrasilAPI
 - [x] Resiliência e observabilidade básica

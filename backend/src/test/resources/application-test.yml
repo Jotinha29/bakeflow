@@ -16,3 +16,6 @@ management:
   health:
     redis:
       enabled: false
+security:
+  permit-all: true
+  jwt-secret: test-secret-key-with-at-least-thirty-two-characters
