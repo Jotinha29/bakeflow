@@ -84,7 +84,7 @@ public class ProductionService {
     }
     public ProductionOrderView complete(UUID id, CompleteInput input) {
         OrderBase base=lockOrder(id); if(base.status()!=ProductionStatus.IN_PROGRESS) throw new DomainException("INVALID_PRODUCTION_TRANSITION");
-        BigDecimal actual=nonNegative(input.actualQuantity()); if(input.destinationLocationId()==null) throw new DomainException("DESTINATION_REQUIRED");
+        BigDecimal actual=positive(input.actualQuantity()); if(actual==null) throw new DomainException("INVALID_ACTUAL_QUANTITY"); if(input.destinationLocationId()==null) throw new DomainException("DESTINATION_REQUIRED");
         RecipeView recipe=recipeRow(base.recipeId()); validateActiveLocation(input.destinationLocationId());
         UUID batchId=UUID.randomUUID(); Timestamp now=Timestamp.from(Instant.now()); LocalDate productionDate=LocalDate.now(ZoneOffset.UTC);
         LocalDate expiration=recipe.shelfLifeDays()==null?null:productionDate.plusDays(recipe.shelfLifeDays());

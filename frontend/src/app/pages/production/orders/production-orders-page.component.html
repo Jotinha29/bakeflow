@@ -1,6 +1,309 @@
-<header class="page-header"><div><span class="kicker">{{'production.kicker'|translate}}</span><h1>{{'orders.title'|translate}}</h1><p>{{'orders.subtitle'|translate}}</p></div><p-button [label]="'orders.create'|translate" icon="pi pi-plus" (onClick)="openCreate()"/></header>
-<form class="filter-panel" [formGroup]="filters" (ngSubmit)="load()"><div class="field"><label>{{'common.code'|translate}}</label><input pInputText formControlName="code"/></div><div class="field"><label>{{'orders.recipe'|translate}}</label><p-select formControlName="recipeId" [options]="recipes()" optionLabel="name" optionValue="id" [showClear]="true"/></div><div class="field"><label>{{'common.status'|translate}}</label><p-select formControlName="status" [options]="statuses()" optionLabel="label" optionValue="value" [showClear]="true"/></div><div class="field"><label>{{'orders.plannedDate'|translate}}</label><input pInputText type="date" formControlName="plannedDate"/></div><div class="actions"><p-button type="button" [label]="'common.clear'|translate" severity="secondary" [outlined]="true" (onClick)="clear()"/><p-button type="submit" [label]="'common.filter'|translate"/></div></form>
-<section class="card"><p-table [value]="orders()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll"><ng-template #header><tr><th>{{'common.code'|translate}}</th><th>{{'orders.product'|translate}}</th><th>{{'orders.recipe'|translate}}</th><th>{{'orders.plannedQuantity'|translate}}</th><th>{{'orders.actualQuantity'|translate}}</th><th>{{'common.status'|translate}}</th><th>{{'orders.plannedDate'|translate}}</th><th>{{'common.actions'|translate}}</th></tr></ng-template><ng-template #body let-o><tr><td><strong>{{o.code}}</strong></td><td>{{o.outputItemName}}</td><td>{{o.recipeName}}</td><td>{{o.plannedQuantity|localizedNumber}} {{'enum.unit.'+o.unit|translate}}</td><td>{{o.actualQuantity|localizedNumber}}</td><td><p-tag [value]="'enum.productionStatus.'+o.status|translate" [severity]="severity(o.status)"/></td><td>{{o.plannedDate|localizedDate}}</td><td><p-button icon="pi pi-eye" [text]="true" [pTooltip]="'common.view'|translate" (onClick)="openDetails(o)"/></td></tr></ng-template><ng-template #emptymessage><tr><td colspan="8"><div class="empty"><p>{{'orders.empty'|translate}}</p></div></td></tr></ng-template></p-table></section>
-<p-dialog [header]="'orders.create'|translate" [visible]="createDialog()" (visibleChange)="createDialog.set($event)" [modal]="true" [style]="{width:'38rem'}"><form [formGroup]="createForm" (ngSubmit)="create()"><div class="form-grid"><div class="field wide"><label>{{'orders.recipe'|translate}} *</label><p-select formControlName="recipeId" [options]="recipes()" optionLabel="name" optionValue="id"/></div><div class="field"><label>{{'orders.plannedQuantity'|translate}} *</label><p-inputnumber formControlName="plannedQuantity" [min]=".001" [maxFractionDigits]="3"/></div><div class="field"><label>{{'orders.plannedDate'|translate}} *</label><input pInputText type="date" formControlName="plannedDate"/></div><div class="field wide"><label>{{'recipes.notes'|translate}}</label><textarea pTextarea formControlName="notes"></textarea></div></div><p-button type="button" [label]="'orders.preview'|translate" icon="pi pi-calculator" [text]="true" [disabled]="!createForm.controls.recipeId.value||!createForm.controls.plannedQuantity.value" (onClick)="previewPlan()"/>@if(planPreview();as p){<section><h3>{{'orders.requirements'|translate}}</h3>@for(r of p.requirements;track r.itemId){<div class="availability" [class.ok]="r.sufficient" [class.missing]="!r.sufficient">{{r.itemName}} · {{r.required|localizedNumber}} {{'enum.unit.'+r.unit|translate}} · {{(r.sufficient?'orders.sufficient':'orders.insufficient')|translate}}</div>}</section>}<div class="dialog-actions"><p-button type="button" [label]="'common.cancel'|translate" severity="secondary" [outlined]="true" (onClick)="createDialog.set(false)"/><p-button type="submit" [label]="'common.save'|translate" [loading]="submitting()" [disabled]="createForm.invalid||submitting()"/></div></form></p-dialog>
-<p-dialog [header]="selected()?.code" [visible]="detailDialog()" (visibleChange)="detailDialog.set($event)" [modal]="true" [style]="{width:'58rem'}">@if(selected();as o){<div class="order-details"><div class="detail-grid"><span>{{'orders.product'|translate}}</span><strong>{{o.outputItemName}}</strong><span>{{'orders.recipe'|translate}}</span><strong>{{o.recipeName}}</strong><span>{{'orders.plannedQuantity'|translate}}</span><strong>{{o.plannedQuantity|localizedNumber}} {{'enum.unit.'+o.unit|translate}}</strong><span>{{'common.status'|translate}}</span><p-tag [value]="'enum.productionStatus.'+o.status|translate" [severity]="severity(o.status)"/></div><section><h3>{{'orders.requirements'|translate}}</h3>@for(r of o.requirements;track r.itemId){<div class="availability" [class.ok]="r.sufficient" [class.missing]="!r.sufficient"><strong>{{r.itemName}}</strong><div>{{'orders.required'|translate}}: {{r.required|localizedNumber}} {{'enum.unit.'+r.unit|translate}} · {{'orders.available'|translate}}: {{r.available|localizedNumber}} · {{(r.sufficient?'orders.sufficient':'orders.insufficient')|translate}}</div>@for(a of r.allocations;track a.batchId+a.locationId){<small>{{a.batchCode}} — {{a.quantity|localizedNumber}} · {{a.expirationDate|localizedDate}}</small><br/>}</div>}</section>@if(o.consumptions.length){<section><h3>{{'orders.consumptions'|translate}}</h3><ul class="trace-list">@for(c of o.consumptions;track c.batchId+c.locationId){<li>{{c.itemName}} · {{c.batchCode}} · {{c.locationName}} · <strong>{{c.quantity|localizedNumber}}</strong></li>}</ul></section>}@if(o.output){<section><h3>{{'orders.output'|translate}}</h3><p>{{o.output.itemName}} · {{o.output.batchCode}} · {{o.output.locationName}} · <strong>{{o.output.quantity|localizedNumber}}</strong></p></section>}<div class="order-actions">@if(o.status==='PLANNED'){<p-button [label]="'orders.start'|translate" icon="pi pi-play" [disabled]="o.requirements.length===0||!o.requirements.every(r=>r.sufficient)||submitting()" (onClick)="start()"/><p-button [label]="'orders.cancel'|translate" severity="danger" [outlined]="true" (onClick)="cancel()"/>}@if(o.status==='IN_PROGRESS'){<p-button [label]="'orders.complete'|translate" icon="pi pi-check" (onClick)="openComplete()"/>}</div></div>}</p-dialog>
-<p-dialog [header]="'orders.complete'|translate" [visible]="completeDialog()" (visibleChange)="completeDialog.set($event)" [modal]="true" [style]="{width:'38rem'}"><form [formGroup]="completeForm" (ngSubmit)="complete()"><div class="form-grid"><div class="field"><label>{{'orders.actualQuantity'|translate}} *</label><p-inputnumber formControlName="actualQuantity" [min]="0" [maxFractionDigits]="3"/></div><div class="field"><label>{{'orders.destination'|translate}} *</label><p-select formControlName="destinationLocationId" [options]="locations()" optionLabel="name" optionValue="id"/></div><div class="field wide"><label>{{'orders.differenceReason'|translate}}</label><input pInputText formControlName="differenceReason"/></div><div class="field wide"><label>{{'recipes.notes'|translate}}</label><textarea pTextarea formControlName="notes"></textarea></div></div><div class="dialog-actions"><p-button type="button" [label]="'common.cancel'|translate" severity="secondary" [outlined]="true" (onClick)="completeDialog.set(false)"/><p-button type="submit" [label]="'orders.complete'|translate" [loading]="submitting()" [disabled]="completeForm.invalid||submitting()"/></div></form></p-dialog>
+<header class="page-header">
+  <div>
+    <span class="kicker">{{ 'production.kicker' | translate }}</span>
+    <h1>{{ 'orders.title' | translate }}</h1>
+    <p>{{ 'orders.subtitle' | translate }}</p>
+  </div>
+  @if (auth.can('PRODUCTION_CREATE')) {
+    <p-button [label]="'orders.create' | translate" icon="pi pi-plus" (onClick)="openCreate()" />
+  }
+</header>
+<form class="filter-panel" [formGroup]="filters" (ngSubmit)="load()">
+  <div class="field">
+    <label>{{ 'common.code' | translate }}</label
+    ><input pInputText formControlName="code" />
+  </div>
+  <div class="field">
+    <label>{{ 'orders.recipe' | translate }}</label
+    ><p-select
+      formControlName="recipeId"
+      [options]="recipes()"
+      optionLabel="name"
+      optionValue="id"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <label>{{ 'common.status' | translate }}</label
+    ><p-select
+      formControlName="status"
+      [options]="statuses()"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <label>{{ 'orders.plannedDate' | translate }}</label
+    ><input pInputText type="date" formControlName="plannedDate" />
+  </div>
+  <div class="actions">
+    <p-button
+      type="button"
+      [label]="'common.clear' | translate"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="clear()"
+    /><p-button type="submit" [label]="'common.filter' | translate" />
+  </div>
+</form>
+<section class="card">
+  <p-table
+    [value]="orders()"
+    [loading]="loading()"
+    [paginator]="true"
+    [rows]="10"
+    responsiveLayout="scroll"
+    ><ng-template #header
+      ><tr>
+        <th>{{ 'common.code' | translate }}</th>
+        <th>{{ 'orders.product' | translate }}</th>
+        <th>{{ 'orders.recipe' | translate }}</th>
+        <th>{{ 'orders.plannedQuantity' | translate }}</th>
+        <th>{{ 'orders.actualQuantity' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th>
+        <th>{{ 'orders.plannedDate' | translate }}</th>
+        <th>{{ 'common.actions' | translate }}</th>
+      </tr></ng-template
+    ><ng-template #body let-o
+      ><tr>
+        <td>
+          <strong>{{ o.code }}</strong>
+        </td>
+        <td>{{ o.outputItemName }}</td>
+        <td>{{ o.recipeName }}</td>
+        <td>{{ o.plannedQuantity | localizedNumber }} {{ 'enum.unit.' + o.unit | translate }}</td>
+        <td>{{ o.actualQuantity | localizedNumber }}</td>
+        <td>
+          <p-tag
+            [value]="'enum.productionStatus.' + o.status | translate"
+            [severity]="severity(o.status)"
+          />
+        </td>
+        <td>{{ o.plannedDate | localizedDate }}</td>
+        <td>
+          <p-button
+            icon="pi pi-eye"
+            [text]="true"
+            [pTooltip]="'common.view' | translate"
+            (onClick)="openDetails(o)"
+          />
+        </td></tr></ng-template
+    ><ng-template #emptymessage
+      ><tr>
+        <td colspan="8">
+          <div class="empty">
+            <p>{{ 'orders.empty' | translate }}</p>
+          </div>
+        </td>
+      </tr></ng-template
+    ></p-table
+  >
+</section>
+<p-dialog
+  [header]="'orders.create' | translate"
+  [visible]="createDialog()"
+  (visibleChange)="createDialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '38rem' }"
+  ><form [formGroup]="createForm" (ngSubmit)="create()">
+    <div class="form-grid">
+      <div class="field wide">
+        <label>{{ 'orders.recipe' | translate }} *</label
+        ><p-select
+          formControlName="recipeId"
+          [options]="recipes()"
+          optionLabel="name"
+          optionValue="id"
+        />
+      </div>
+      <div class="field">
+        <label>{{ 'orders.plannedQuantity' | translate }} *</label
+        ><p-inputnumber formControlName="plannedQuantity" [min]="0.001" [maxFractionDigits]="3" />
+      </div>
+      <div class="field">
+        <label>{{ 'orders.plannedDate' | translate }} *</label
+        ><input pInputText type="date" formControlName="plannedDate" />
+      </div>
+      <div class="field wide">
+        <label>{{ 'recipes.notes' | translate }}</label
+        ><textarea pTextarea formControlName="notes"></textarea>
+      </div>
+    </div>
+    <p-button
+      type="button"
+      [label]="'orders.preview' | translate"
+      icon="pi pi-calculator"
+      [text]="true"
+      [disabled]="!createForm.controls.recipeId.value || !createForm.controls.plannedQuantity.value"
+      (onClick)="previewPlan()"
+    />
+    @if (planPreview(); as p) {
+      <section>
+        <h3>{{ 'orders.requirements' | translate }}</h3>
+        @for (r of p.requirements; track r.itemId) {
+          <div class="availability" [class.ok]="r.sufficient" [class.missing]="!r.sufficient">
+            {{ r.itemName }} · {{ r.required | localizedNumber }}
+            {{ 'enum.unit.' + r.unit | translate }} ·
+            {{ (r.sufficient ? 'orders.sufficient' : 'orders.insufficient') | translate }}
+          </div>
+        }
+      </section>
+    }
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        [label]="'common.cancel' | translate"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="createDialog.set(false)"
+      /><p-button
+        type="submit"
+        [label]="'common.save' | translate"
+        [loading]="submitting()"
+        [disabled]="createForm.invalid || submitting()"
+      />
+    </div></form
+></p-dialog>
+<p-dialog
+  [header]="selected()?.code"
+  [visible]="detailDialog()"
+  (visibleChange)="detailDialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '58rem' }"
+>
+  @if (selected(); as o) {
+    <div class="order-details">
+      <div class="detail-grid">
+        <span>{{ 'orders.product' | translate }}</span
+        ><strong>{{ o.outputItemName }}</strong
+        ><span>{{ 'orders.recipe' | translate }}</span
+        ><strong>{{ o.recipeName }}</strong
+        ><span>{{ 'orders.plannedQuantity' | translate }}</span
+        ><strong
+          >{{ o.plannedQuantity | localizedNumber }} {{ 'enum.unit.' + o.unit | translate }}</strong
+        ><span>{{ 'common.status' | translate }}</span
+        ><p-tag
+          [value]="'enum.productionStatus.' + o.status | translate"
+          [severity]="severity(o.status)"
+        />
+      </div>
+      <section>
+        <h3>{{ 'orders.requirements' | translate }}</h3>
+        @for (r of o.requirements; track r.itemId) {
+          <div class="availability" [class.ok]="r.sufficient" [class.missing]="!r.sufficient">
+            <strong>{{ r.itemName }}</strong>
+            <div>
+              {{ 'orders.required' | translate }}: {{ r.required | localizedNumber }}
+              {{ 'enum.unit.' + r.unit | translate }} · {{ 'orders.available' | translate }}:
+              {{ r.available | localizedNumber }} ·
+              {{ (r.sufficient ? 'orders.sufficient' : 'orders.insufficient') | translate }}
+            </div>
+            @for (a of r.allocations; track a.batchId + a.locationId) {
+              <small
+                >{{ a.batchCode }} — {{ a.quantity | localizedNumber }} ·
+                {{ a.expirationDate | localizedDate }}</small
+              ><br />
+            }
+          </div>
+        }
+      </section>
+      @if (o.consumptions.length) {
+        <section>
+          <h3>{{ 'orders.consumptions' | translate }}</h3>
+          <ul class="trace-list">
+            @for (c of o.consumptions; track c.batchId + c.locationId) {
+              <li>
+                {{ c.itemName }} · {{ c.batchCode }} · {{ c.locationName }} ·
+                <strong>{{ c.quantity | localizedNumber }}</strong>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+      @if (o.output) {
+        <section>
+          <h3>{{ 'orders.output' | translate }}</h3>
+          <p>
+            {{ o.output.itemName }} · {{ o.output.batchCode }} · {{ o.output.locationName }} ·
+            <strong>{{ o.output.quantity | localizedNumber }}</strong>
+          </p>
+        </section>
+      }
+      <div class="order-actions">
+        @if (o.status === 'PLANNED' && auth.can('PRODUCTION_START')) {
+          <p-button
+            [label]="'orders.start' | translate"
+            icon="pi pi-play"
+            [disabled]="
+              o.requirements.length === 0 ||
+              !o.requirements.every((r) => r.sufficient) ||
+              submitting()
+            "
+            (onClick)="start()"
+          />
+        }
+        @if (o.status === 'PLANNED' && auth.can('PRODUCTION_CANCEL')) {
+          <p-button
+            [label]="'orders.cancel' | translate"
+            severity="danger"
+            [outlined]="true"
+            (onClick)="cancel()"
+          />
+        }
+        @if (o.status === 'IN_PROGRESS' && auth.can('PRODUCTION_COMPLETE')) {
+          <p-button
+            [label]="'orders.complete' | translate"
+            icon="pi pi-check"
+            (onClick)="openComplete()"
+          />
+        }
+      </div>
+    </div>
+  }
+</p-dialog>
+<p-dialog
+  [header]="'orders.complete' | translate"
+  [visible]="completeDialog()"
+  (visibleChange)="completeDialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '38rem' }"
+  ><form [formGroup]="completeForm" (ngSubmit)="complete()">
+    <div class="form-grid">
+      <div class="field">
+        <label>{{ 'orders.actualQuantity' | translate }} *</label
+        ><p-inputnumber formControlName="actualQuantity" [min]="0.001" [maxFractionDigits]="3" />
+      </div>
+      <div class="field">
+        <label>{{ 'orders.destination' | translate }} *</label
+        ><p-select
+          formControlName="destinationLocationId"
+          [options]="locations()"
+          optionLabel="name"
+          optionValue="id"
+        />
+      </div>
+      <div class="field wide">
+        <label>{{ 'orders.differenceReason' | translate }}</label
+        ><input pInputText formControlName="differenceReason" />
+      </div>
+      <div class="field wide">
+        <label>{{ 'recipes.notes' | translate }}</label
+        ><textarea pTextarea formControlName="notes"></textarea>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        [label]="'common.cancel' | translate"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="completeDialog.set(false)"
+      /><p-button
+        type="submit"
+        [label]="'orders.complete' | translate"
+        [loading]="submitting()"
+        [disabled]="completeForm.invalid || submitting()"
+      />
+    </div></form
+></p-dialog>

@@ -1,1 +1,18 @@
-<section class="page-header"><h1>{{'account.title'|translate}}</h1><p>{{auth.user()?.name}} · {{auth.user()?.email}}</p><p>{{auth.user()?.roles?.join(', ')}}</p></section><section><h2>{{'account.changePassword'|translate}}</h2><div class="form-grid"><input type="password" [(ngModel)]="current" [placeholder]="'account.currentPassword'|translate"><input type="password" [(ngModel)]="next" [placeholder]="'account.newPassword'|translate"><p-button [label]="'account.changePassword'|translate" (onClick)="change()" [disabled]="next.length<8"/>@if(message()){<p>{{message()|translate}}</p>}</div></section><section><h2>{{'account.sessions'|translate}}</h2>@for(s of sessions();track s.id){<div class="session"><span>{{s.userAgent||'—'}} · {{s.createdAt}} @if(s.current){({{'account.current'|translate}})}</span>@if(!s.current){<p-button [label]="'account.revoke'|translate" [text]="true" (onClick)="revoke(s.id)"/>}</div>}<div class="actions"><p-button [label]="'account.logout'|translate" severity="secondary" (onClick)="logout()"/><p-button [label]="'account.logoutAll'|translate" severity="danger" (onClick)="logoutAll()"/></div></section>
+<section class="page-header"><h1>{{'account.title'|translate}}</h1>
+  <p>{{auth.user()?.name}} · {{auth.user()?.email}}</p><p>{{auth.user()?.roles?.join(', ')}}</p></section>
+<section><h2>{{'account.changePassword'|translate}}</h2><div class="form-grid">
+  <input type="password" autocomplete="current-password" [(ngModel)]="current"
+    [placeholder]="'account.currentPassword'|translate">
+  <input type="password" autocomplete="new-password" minlength="8" maxlength="128" [(ngModel)]="next"
+    [placeholder]="'account.newPassword'|translate">
+  <p-button [label]="'account.changePassword'|translate" [loading]="changing()" (onClick)="change()"
+    [disabled]="next.length<8||changing()"/></div></section>
+<section><h2>{{'account.sessions'|translate}}</h2>
+  @if(loading()){<p>{{'common.loading'|translate}}</p>}
+  @for(session of sessions();track session.id){<div class="session">
+    <span>{{session.userAgent||'—'}} · {{session.createdAt}} @if(session.current){({{'account.current'|translate}})}</span>
+    @if(!session.current){<p-button [label]="'account.revoke'|translate" [text]="true"
+      (onClick)="revoke(session.id)"/>}</div>}
+  <div class="actions"><p-button [label]="'account.logout'|translate" severity="secondary" (onClick)="logout()"/>
+    <p-button [label]="'account.logoutAll'|translate" severity="danger" (onClick)="logoutAll()"/></div>
+</section>

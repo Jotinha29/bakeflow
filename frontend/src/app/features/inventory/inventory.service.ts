@@ -15,7 +15,7 @@ import {
 export class InventoryService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/v1';
-  items(filters: Record<string, string | number | boolean | undefined>) {
+  items(filters: Record<string, string | number | boolean | null | undefined>) {
     return this.http.get<PageResult<Item>>(`${this.base}/items`, { params: this.params(filters) });
   }
   saveItem(input: ItemInput, id?: string) {
@@ -34,7 +34,7 @@ export class InventoryService {
       `${this.base}/product-information/barcode/${encodeURIComponent(barcode)}`,
     );
   }
-  batches(filters: Record<string, string | number | boolean | undefined>) {
+  batches(filters: Record<string, string | number | boolean | null | undefined>) {
     return this.http.get<PageResult<Batch>>(`${this.base}/batches`, {
       params: this.params(filters),
     });
@@ -50,7 +50,7 @@ export class InventoryService {
       {},
     );
   }
-  locations(filters: Record<string, string | number | boolean | undefined>) {
+  locations(filters: Record<string, string | number | boolean | null | undefined>) {
     return this.http.get<PageResult<Location>>(`${this.base}/locations`, {
       params: this.params(filters),
     });
@@ -69,10 +69,10 @@ export class InventoryService {
       {},
     );
   }
-  private params(values: Record<string, string | number | boolean | undefined>) {
+  private params(values: Record<string, string | number | boolean | null | undefined>) {
     let params = new HttpParams();
     Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined && value !== '') params = params.set(key, value);
+      if (value !== null && value !== undefined && value !== '') params = params.set(key, value);
     });
     return params;
   }

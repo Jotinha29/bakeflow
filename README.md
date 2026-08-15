@@ -1,8 +1,8 @@
 # BakeFlow
 
-Plataforma de gestão de estoque e produção para padarias e pequenos fabricantes de alimentos.
+Plataforma de catálogo de estoque e gestão de produção para padarias e pequenos fabricantes de alimentos.
 
-O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece catálogo e saldo de estoque, rastreabilidade de movimentações, receitas, ordens de produção e consulta pública opcional de produtos por código de barras.
+O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece catálogo, lotes, locais, saldo usado pela produção, rastreabilidade dos movimentos gerados pela produção, receitas e ordens. Entradas, saídas, transferências, perdas e histórico completo de estoque ainda não possuem API ou tela próprias.
 
 ## Tecnologias
 
@@ -85,7 +85,7 @@ Os endpoints versionados ficam em `/api/v1/items`, `/api/v1/batches`, `/api/v1/l
 
 Os TTLs são configuráveis. O valor permanece retido por mais sete dias para fallback stale quando o provedor falha, sempre indicado no contrato. As chamadas possuem timeouts de conexão e leitura, no máximo duas tentativas e circuit breaker. Um fixed window no Redis limita apenas endpoints externos e responde HTTP 429. As chaves seguem `bakeflow:integration:{provider}:{resource}:{id}`, `bakeflow:ratelimit:{resource}:{client}:{window}` e marcadores fresh com sufixo `:fresh`.
 
-Cada resposta inclui `X-Request-ID`, aceitando somente identificadores de formato seguro enviados pelo cliente. `/api/v1/system/integrations` informa configuração, circuitos e disponibilidade do Redis sem consultar provedores. Eventos de estoque decorrentes da produção e transições das ordens são persistidos transacionalmente em `audit_events`, separados dos logs técnicos.
+Cada resposta inclui `X-Request-ID`, aceitando somente identificadores de formato seguro enviados pelo cliente. `/api/v1/system/integrations` informa configuração, circuitos e disponibilidade do Redis sem consultar provedores. Eventos de estoque decorrentes da produção e transições das ordens são persistidos transacionalmente em `audit_events`, separados dos logs técnicos. A auditoria é atualmente interna: os eventos identificam o usuário autenticado quando aplicável, mas ainda não há tela ou endpoint de consulta.
 
 ## Fluxo de produção
 
@@ -121,7 +121,7 @@ Há perfis Spring para `dev`, `test` e `prod`. Banco de dados, Redis e Open Food
 
 ## Autenticação e controle de acesso
 
-O backend é a autoridade de acesso por Spring Security. O login gera JWT HS256 de 15 minutos mantido apenas em memória pela SPA. O refresh token é aleatório, persistido somente como SHA-256, enviado em cookie HttpOnly/SameSite Strict e rotacionado a cada uso; reutilização revoga toda a família. Senhas usam Argon2id e aceitam passphrases de 8 a 128 caracteres. Endpoints pessoais validam ownership e operações baseadas no cookie validam a origem, complementando SameSite. Em produção, configure cookie Secure e um segredo JWT aleatório com pelo menos 32 caracteres.
+O backend é a autoridade de acesso por Spring Security. O login gera JWT HS256 de 15 minutos mantido apenas em memória pela SPA. O refresh token é aleatório, persistido somente como SHA-256, enviado em cookie HttpOnly/SameSite Strict e rotacionado a cada uso. A reutilização de um token revoga a família na mesma transação, preservando a revogação mesmo quando a API retorna erro. Senhas usam Argon2id e aceitam passphrases de 8 a 128 caracteres. Endpoints pessoais validam ownership e operações baseadas no cookie validam a origem, complementando SameSite. Em produção, configure cookie Secure e um segredo JWT aleatório com pelo menos 32 caracteres.
 
 | Recurso | Admin | Gestor | Operador | Consulta |
 | --- | --- | --- | --- | --- |
@@ -132,20 +132,28 @@ O backend é a autoridade de acesso por Spring Security. O login gera JWT HS256 
 | Usuários | ✓ | — | — | — |
 | Auditoria | ✓ | ✓ | — | — |
 
-O perfil `dev` cria o administrador somente quando o banco está vazio e `DEMO_ADMIN_PASSWORD` foi informado. O perfil de produção nunca cria credenciais padrão. Ao inativar um usuário, todos os refresh tokens são revogados; o access token curto existente expira naturalmente.
+O perfil `dev` garante idempotentemente que o e-mail configurado possua o papel ADMIN quando `DEMO_ADMIN_PASSWORD` foi informado. Senhas demo fora da política interrompem a inicialização com uma mensagem explícita, sem revelar o valor. O perfil de produção nunca cria credenciais padrão. Ao inativar um usuário, todos os refresh tokens são revogados; por decisão documentada, o access token curto existente permanece válido até expirar.
 
 ```text
 Angular → JWT Bearer → Spring Security → Application → PostgreSQL
                Refresh → HttpOnly Cookie → rotação e revogação
 ```
 
+### Testes de segurança
+
+A suíte dedicada mantém o Spring Security habilitado e cobre fronteiras 401/403, roles representativas, JWT inválido ou expirado, cookies, logout, sessões, IDOR, alteração de senha, rate limit e persistência da revogação após reuse. No frontend, os testes cobrem o interceptor restrito à API interna, refresh single-flight, falha de refresh, guards e sanitização de filtros.
+
+### Aviso de licença PrimeUI
+
+O PrimeNG 22 inclui transitivamente `@primeuix/styled` e `@primeui/license-manager`. Em ambientes sem uma chave PrimeUI válida, a biblioteca emite um aviso no console. O aviso não foi ocultado nem contornado: a correção legítima exige configurar uma licença compatível com os termos do fornecedor ou substituir a dependência em uma evolução futura.
+
 ## Roadmap
 
 - [x] Gestão de itens
 - [x] Controle de lotes
 - [x] Locais de estoque
-- [x] Controle de saldo
-- [x] Movimentações
+- [x] Saldo e movimentos transacionais usados pela produção
+- [ ] Movimentações manuais e consulta completa de estoque
 - [x] Integração com Open Food Facts
 - [x] Internacionalização pt-BR e en
 - [x] Receitas

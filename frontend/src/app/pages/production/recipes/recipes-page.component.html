@@ -1,5 +1,240 @@
-<header class="page-header"><div><span class="kicker">{{'production.kicker'|translate}}</span><h1>{{'recipes.title'|translate}}</h1><p>{{'recipes.subtitle'|translate}}</p></div><p-button [label]="'recipes.create'|translate" icon="pi pi-plus" (onClick)="open()"/></header>
-<form class="filter-panel" [formGroup]="filters" (ngSubmit)="load()"><div class="field"><label for="recipe-search">{{'common.name'|translate}}</label><input pInputText id="recipe-search" formControlName="search"/></div><div class="field"><label>{{'recipes.output'|translate}}</label><p-select formControlName="outputItemId" [options]="items()" optionLabel="name" optionValue="id" [showClear]="true"/></div><div class="field"><label>{{'common.status'|translate}}</label><p-select formControlName="active" [options]="statuses()" optionLabel="label" optionValue="value" [showClear]="true"/></div><div class="actions"><p-button type="button" [label]="'common.clear'|translate" severity="secondary" [outlined]="true" (onClick)="clear()"/><p-button type="submit" [label]="'common.filter'|translate" icon="pi pi-filter"/></div></form>
-<section class="card"><p-table [value]="recipes()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll"><ng-template #header><tr><th>{{'common.name'|translate}}</th><th>{{'recipes.output'|translate}}</th><th>{{'recipes.yield'|translate}}</th><th>{{'common.status'|translate}}</th><th>{{'common.actions'|translate}}</th></tr></ng-template><ng-template #body let-r><tr><td><strong>{{r.name}}</strong></td><td>{{r.outputItemName}}</td><td>{{r.yieldQuantity|localizedNumber}} {{'enum.unit.'+r.yieldUnit|translate}}</td><td><p-tag [value]="(r.active?'common.active':'common.inactive')|translate" [severity]="r.active?'success':'secondary'"/></td><td><div class="row-actions"><p-button icon="pi pi-eye" [text]="true" [pTooltip]="'common.view'|translate" (onClick)="view(r)"/><p-button icon="pi pi-pencil" [text]="true" [pTooltip]="'common.edit'|translate" (onClick)="open(r)"/><p-button [icon]="r.active?'pi pi-ban':'pi pi-check'" [text]="true" (onClick)="toggle(r)"/></div></td></tr></ng-template><ng-template #emptymessage><tr><td colspan="5"><div class="empty"><p>{{'recipes.empty'|translate}}</p></div></td></tr></ng-template></p-table></section>
-<p-dialog [header]="(editing()?'recipes.edit':'recipes.create')|translate" [visible]="dialog()" (visibleChange)="dialog.set($event)" [modal]="true" [style]="{width:'58rem'}"><form [formGroup]="form" (ngSubmit)="save()"><div class="form-grid"><div class="field"><label>{{'common.name'|translate}} *</label><input pInputText formControlName="name"/></div><div class="field"><label>{{'recipes.output'|translate}} *</label><p-select formControlName="outputItemId" [options]="items()" optionLabel="name" optionValue="id"/></div><div class="field"><label>{{'recipes.yield'|translate}} *</label><p-inputnumber formControlName="yieldQuantity" [min]="0.001" [maxFractionDigits]="3"/></div><div class="field"><label>{{'items.unit'|translate}} *</label><p-select formControlName="yieldUnit" [options]="units()" optionLabel="label" optionValue="value"/></div><div class="field"><label>{{'recipes.shelfLife'|translate}}</label><p-inputnumber formControlName="shelfLifeDays" [min]="0"/></div><div class="field wide"><label>{{'recipes.notes'|translate}}</label><textarea pTextarea formControlName="notes" rows="2"></textarea></div></div><div class="section-header"><h3>{{'recipes.ingredients'|translate}}</h3><p-button type="button" [label]="'recipes.addIngredient'|translate" icon="pi pi-plus" [text]="true" (onClick)="addIngredient()"/></div><div formArrayName="ingredients" class="ingredient-list">@for(group of ingredients.controls;track $index){<div class="ingredient-row" [formGroupName]="$index"><p-select formControlName="itemId" [options]="items()" optionLabel="name" optionValue="id" [placeholder]="'recipes.ingredient'|translate"/><p-inputnumber formControlName="quantity" [min]="0.001" [maxFractionDigits]="3"/><p-select formControlName="unit" [options]="units()" optionLabel="label" optionValue="value"/><p-button type="button" icon="pi pi-trash" severity="danger" [text]="true" [disabled]="ingredients.length===1" (onClick)="removeIngredient($index)"/></div>}</div>@if(form.invalid&&form.touched){<p class="error">{{'recipes.validation'|translate}}</p>}<div class="dialog-actions"><p-button type="button" [label]="'common.cancel'|translate" severity="secondary" [outlined]="true" (onClick)="dialog.set(false)"/><p-button type="submit" [label]="'common.save'|translate" [loading]="submitting()" [disabled]="form.invalid||submitting()"/></div></form></p-dialog>
-<p-dialog [header]="selected()?.name" [visible]="viewDialog()" (visibleChange)="viewDialog.set($event)" [modal]="true" [style]="{width:'36rem'}">@if(selected();as r){<div class="detail-grid"><span>{{'recipes.output'|translate}}</span><strong>{{r.outputItemName}}</strong><span>{{'recipes.yield'|translate}}</span><strong>{{r.yieldQuantity|localizedNumber}} {{'enum.unit.'+r.yieldUnit|translate}}</strong></div><h3>{{'recipes.ingredients'|translate}}</h3><ul class="trace-list">@for(i of r.ingredients;track i.id){<li><strong>{{i.quantity|localizedNumber}} {{'enum.unit.'+i.unit|translate}}</strong> {{i.itemName}}</li>}</ul>@if(r.notes){<p>{{r.notes}}</p>}}</p-dialog>
+<header class="page-header">
+  <div>
+    <span class="kicker">{{ 'production.kicker' | translate }}</span>
+    <h1>{{ 'recipes.title' | translate }}</h1>
+    <p>{{ 'recipes.subtitle' | translate }}</p>
+  </div>
+  @if (auth.can('RECIPE_WRITE')) {
+    <p-button [label]="'recipes.create' | translate" icon="pi pi-plus" (onClick)="open()" />
+  }
+</header>
+<form class="filter-panel" [formGroup]="filters" (ngSubmit)="load()">
+  <div class="field">
+    <label for="recipe-search">{{ 'common.name' | translate }}</label
+    ><input pInputText id="recipe-search" formControlName="search" />
+  </div>
+  <div class="field">
+    <label>{{ 'recipes.output' | translate }}</label
+    ><p-select
+      formControlName="outputItemId"
+      [options]="items()"
+      optionLabel="name"
+      optionValue="id"
+      [showClear]="true"
+    />
+  </div>
+  <div class="field">
+    <label>{{ 'common.status' | translate }}</label
+    ><p-select
+      formControlName="active"
+      [options]="statuses()"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+  </div>
+  <div class="actions">
+    <p-button
+      type="button"
+      [label]="'common.clear' | translate"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="clear()"
+    /><p-button type="submit" [label]="'common.filter' | translate" icon="pi pi-filter" />
+  </div>
+</form>
+<section class="card">
+  <p-table
+    [value]="recipes()"
+    [loading]="loading()"
+    [paginator]="true"
+    [rows]="10"
+    responsiveLayout="scroll"
+    ><ng-template #header
+      ><tr>
+        <th>{{ 'common.name' | translate }}</th>
+        <th>{{ 'recipes.output' | translate }}</th>
+        <th>{{ 'recipes.yield' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th>
+        <th>{{ 'common.actions' | translate }}</th>
+      </tr></ng-template
+    ><ng-template #body let-r
+      ><tr>
+        <td>
+          <strong>{{ r.name }}</strong>
+        </td>
+        <td>{{ r.outputItemName }}</td>
+        <td>
+          {{ r.yieldQuantity | localizedNumber }} {{ 'enum.unit.' + r.yieldUnit | translate }}
+        </td>
+        <td>
+          <p-tag
+            [value]="(r.active ? 'common.active' : 'common.inactive') | translate"
+            [severity]="r.active ? 'success' : 'secondary'"
+          />
+        </td>
+        <td>
+          <div class="row-actions">
+            <p-button
+              icon="pi pi-eye"
+              [text]="true"
+              [pTooltip]="'common.view' | translate"
+              (onClick)="view(r)"
+            />
+            @if (auth.can('RECIPE_WRITE')) {
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                [pTooltip]="'common.edit' | translate"
+                (onClick)="open(r)"
+              /><p-button
+                [icon]="r.active ? 'pi pi-ban' : 'pi pi-check'"
+                [text]="true"
+                (onClick)="toggle(r)"
+              />
+            }
+          </div>
+        </td></tr></ng-template
+    ><ng-template #emptymessage
+      ><tr>
+        <td colspan="5">
+          <div class="empty">
+            <p>{{ 'recipes.empty' | translate }}</p>
+          </div>
+        </td>
+      </tr></ng-template
+    ></p-table
+  >
+</section>
+<p-dialog
+  [header]="(editing() ? 'recipes.edit' : 'recipes.create') | translate"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '58rem' }"
+  ><form [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <div class="field">
+        <label>{{ 'common.name' | translate }} *</label><input pInputText formControlName="name" />
+      </div>
+      <div class="field">
+        <label>{{ 'recipes.output' | translate }} *</label
+        ><p-select
+          formControlName="outputItemId"
+          [options]="items()"
+          optionLabel="name"
+          optionValue="id"
+        />
+      </div>
+      <div class="field">
+        <label>{{ 'recipes.yield' | translate }} *</label
+        ><p-inputnumber formControlName="yieldQuantity" [min]="0.001" [maxFractionDigits]="3" />
+      </div>
+      <div class="field">
+        <label>{{ 'items.unit' | translate }} *</label
+        ><p-select
+          formControlName="yieldUnit"
+          [options]="units()"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+      <div class="field">
+        <label>{{ 'recipes.shelfLife' | translate }}</label
+        ><p-inputnumber formControlName="shelfLifeDays" [min]="0" />
+      </div>
+      <div class="field wide">
+        <label>{{ 'recipes.notes' | translate }}</label
+        ><textarea pTextarea formControlName="notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="section-header">
+      <h3>{{ 'recipes.ingredients' | translate }}</h3>
+      <p-button
+        type="button"
+        [label]="'recipes.addIngredient' | translate"
+        icon="pi pi-plus"
+        [text]="true"
+        (onClick)="addIngredient()"
+      />
+    </div>
+    <div formArrayName="ingredients" class="ingredient-list">
+      @for (group of ingredients.controls; track $index) {
+        <div class="ingredient-row" [formGroupName]="$index">
+          <p-select
+            formControlName="itemId"
+            [options]="items()"
+            optionLabel="name"
+            optionValue="id"
+            [placeholder]="'recipes.ingredient' | translate"
+          /><p-inputnumber
+            formControlName="quantity"
+            [min]="0.001"
+            [maxFractionDigits]="3"
+          /><p-select
+            formControlName="unit"
+            [options]="units()"
+            optionLabel="label"
+            optionValue="value"
+          /><p-button
+            type="button"
+            icon="pi pi-trash"
+            severity="danger"
+            [text]="true"
+            [disabled]="ingredients.length === 1"
+            (onClick)="removeIngredient($index)"
+          />
+        </div>
+      }
+    </div>
+    @if (form.invalid && form.touched) {
+      <p class="error">{{ 'recipes.validation' | translate }}</p>
+    }
+    <div class="dialog-actions">
+      <p-button
+        type="button"
+        [label]="'common.cancel' | translate"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="dialog.set(false)"
+      /><p-button
+        type="submit"
+        [label]="'common.save' | translate"
+        [loading]="submitting()"
+        [disabled]="form.invalid || submitting()"
+      />
+    </div></form
+></p-dialog>
+<p-dialog
+  [header]="selected()?.name"
+  [visible]="viewDialog()"
+  (visibleChange)="viewDialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '36rem' }"
+>
+  @if (selected(); as r) {
+    <div class="detail-grid">
+      <span>{{ 'recipes.output' | translate }}</span
+      ><strong>{{ r.outputItemName }}</strong
+      ><span>{{ 'recipes.yield' | translate }}</span
+      ><strong
+        >{{ r.yieldQuantity | localizedNumber }}
+        {{ 'enum.unit.' + r.yieldUnit | translate }}</strong
+      >
+    </div>
+    <h3>{{ 'recipes.ingredients' | translate }}</h3>
+    <ul class="trace-list">
+      @for (i of r.ingredients; track i.id) {
+        <li>
+          <strong
+            >{{ i.quantity | localizedNumber }} {{ 'enum.unit.' + i.unit | translate }}</strong
+          >
+          {{ i.itemName }}
+        </li>
+      }
+    </ul>
+    @if (r.notes) {
+      <p>{{ r.notes }}</p>
+    }
+  }
+</p-dialog>

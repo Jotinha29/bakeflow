@@ -1,1 +1,36 @@
-<section class="page-header"><span class="eyebrow">{{'nav.administration'|translate}}</span><h1>{{'users.title'|translate}}</h1><p>{{'users.subtitle'|translate}}</p></section><div class="section-header"><input [(ngModel)]="search" (keyup.enter)="load()" [placeholder]="'users.search'|translate"><p-button [label]="'users.create'|translate" icon="pi pi-plus" (onClick)="open()"/></div><p-table [value]="users()" [paginator]="true" [rows]="20" [totalRecords]="total()" [lazy]="true" (onLazyLoad)="load(($event.first??0)/($event.rows??20))"><ng-template #header><tr><th>{{'common.name'|translate}}</th><th>{{'auth.email'|translate}}</th><th>{{'users.role'|translate}}</th><th>{{'common.status'|translate}}</th><th>{{'users.lastLogin'|translate}}</th><th></th></tr></ng-template><ng-template #body let-u><tr><td>{{u.name}}</td><td>{{u.email}}</td><td>{{u.roles.join(', ')}}</td><td><p-tag [value]="(u.active?'common.active':'common.inactive')|translate" [severity]="u.active?'success':'secondary'"/></td><td>{{u.lastLoginAt||'—'}}</td><td><p-button icon="pi pi-pencil" [text]="true" (onClick)="open(u)"/></td></tr></ng-template></p-table><p-dialog [header]="(editing?'users.edit':'users.create')|translate" [visible]="dialog()" (visibleChange)="dialog.set($event)" [modal]="true"><div class="form-grid"><label>{{'common.name'|translate}}<input [(ngModel)]="name"></label><label>{{'auth.email'|translate}}<input type="email" [(ngModel)]="email"></label>@if(!editing){<label>{{'users.initialPassword'|translate}}<input type="password" [(ngModel)]="password"></label>}<label>{{'users.role'|translate}}<select [(ngModel)]="role"><option>ADMIN</option><option>MANAGER</option><option>OPERATOR</option><option>VIEWER</option></select></label><label><input type="checkbox" [(ngModel)]="active"> {{'common.active'|translate}}</label><p-button [label]="'common.save'|translate" (onClick)="save()"/></div></p-dialog>
+<section class="page-header"><span class="eyebrow">{{'nav.administration'|translate}}</span>
+  <h1>{{'users.title'|translate}}</h1><p>{{'users.subtitle'|translate}}</p></section>
+<div class="filter-panel">
+  <input [(ngModel)]="search" (keyup.enter)="load()" [placeholder]="'users.search'|translate">
+  <p-select [(ngModel)]="status" [options]="statusOptions" optionValue="value"
+    [showClear]="true" [placeholder]="'common.status'|translate">
+    <ng-template #item let-option>{{option.label|translate}}</ng-template>
+    <ng-template #selectedItem let-option>{{option?.label|translate}}</ng-template>
+  </p-select>
+  <p-select [(ngModel)]="role" [options]="roleOptions" [showClear]="true"
+    [placeholder]="'users.role'|translate"/>
+  <p-button [label]="'common.clear'|translate" severity="secondary" [outlined]="true"
+    (onClick)="clearFilters()"/>
+  <p-button [label]="'common.filter'|translate" icon="pi pi-filter" (onClick)="load()"/>
+  <p-button [label]="'users.create'|translate" icon="pi pi-plus" (onClick)="open()"/>
+</div>
+<p-table [value]="users()" [loading]="loading()" [paginator]="true" [rows]="20"
+  [totalRecords]="total()" [lazy]="true" (onLazyLoad)="load(($event.first??0)/($event.rows??20))">
+  <ng-template #header><tr><th>{{'common.name'|translate}}</th><th>{{'auth.email'|translate}}</th>
+    <th>{{'users.role'|translate}}</th><th>{{'common.status'|translate}}</th>
+    <th>{{'users.lastLogin'|translate}}</th><th></th></tr></ng-template>
+  <ng-template #body let-user><tr><td>{{user.name}}</td><td>{{user.email}}</td>
+    <td>{{user.roles.join(', ')}}</td><td><p-tag [value]="(user.active?'common.active':'common.inactive')|translate"
+      [severity]="user.active?'success':'secondary'"/></td><td>{{user.lastLoginAt||'—'}}</td>
+    <td><p-button icon="pi pi-pencil" [text]="true" (onClick)="open(user)"/></td></tr></ng-template>
+</p-table>
+<p-dialog [header]="(editing?'users.edit':'users.create')|translate" [visible]="dialog()"
+  (visibleChange)="dialog.set($event)" [modal]="true">
+  <div class="form-grid"><label>{{'common.name'|translate}}<input [(ngModel)]="name"></label>
+    <label>{{'auth.email'|translate}}<input type="email" [(ngModel)]="email"></label>
+    @if(!editing){<label>{{'users.initialPassword'|translate}}<input type="password" [(ngModel)]="password"></label>}
+    <div><span>{{'users.role'|translate}}</span><p-multiselect [(ngModel)]="roles" [options]="roleOptions"/></div>
+    <label><input type="checkbox" [(ngModel)]="active"> {{'common.active'|translate}}</label>
+    <p-button [label]="'common.save'|translate" [loading]="saving()" (onClick)="save()"/>
+  </div>
+</p-dialog>

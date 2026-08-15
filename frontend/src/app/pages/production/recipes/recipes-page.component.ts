@@ -2,26 +2,219 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';import { DialogModule } from 'primeng/dialog';import { InputNumberModule } from 'primeng/inputnumber';import { InputTextModule } from 'primeng/inputtext';import { SelectModule } from 'primeng/select';import { TableModule } from 'primeng/table';import { TagModule } from 'primeng/tag';import { TextareaModule } from 'primeng/textarea';import { TooltipModule } from 'primeng/tooltip';
-import { I18nService } from '../../../core/i18n/i18n.service';import { LocalizedNumberPipe } from '../../../core/i18n/localized-number.pipe';import { TranslatePipe } from '../../../core/i18n/translate.pipe';
-import { InventoryService } from '../../../features/inventory/inventory.service';import { Item, UnitOfMeasure } from '../../../features/inventory/inventory.models';import { ProductionService } from '../../../features/production/production.service';import { Recipe, RecipeInput } from '../../../features/production/production.models';
-@Component({selector:'app-recipes-page',imports:[ReactiveFormsModule,ButtonModule,DialogModule,InputNumberModule,InputTextModule,SelectModule,TableModule,TagModule,TextareaModule,TooltipModule,TranslatePipe,LocalizedNumberPipe],templateUrl:'./recipes-page.component.html',styleUrls:['../../inventory/inventory-page.scss','../production-page.scss'],changeDetection:ChangeDetectionStrategy.OnPush})
-export class RecipesPageComponent{
- private fb=inject(FormBuilder);private api=inject(ProductionService);private inventory=inject(InventoryService);private messages=inject(MessageService);private confirmations=inject(ConfirmationService);protected i18n=inject(I18nService);
- protected loading=signal(false);protected submitting=signal(false);protected recipes=signal<Recipe[]>([]);protected items=signal<Item[]>([]);protected dialog=signal(false);protected viewDialog=signal(false);protected editing=signal<Recipe|undefined>(undefined);protected selected=signal<Recipe|undefined>(undefined);
- protected statuses=computed(()=>[{label:this.i18n.translate('common.active'),value:true},{label:this.i18n.translate('common.inactive'),value:false}]);protected units=computed(()=>['UNIT','KG','G','L','ML'].map(value=>({label:this.i18n.translate(`enum.unit.${value}`),value})));
- protected filters=this.fb.group({search:[''],outputItemId:[''],active:[undefined as boolean|undefined]});
- protected form=this.fb.group({name:['',Validators.required],outputItemId:['',Validators.required],yieldQuantity:[null as number|null,[Validators.required,Validators.min(0.001)]],yieldUnit:['UNIT' as UnitOfMeasure,Validators.required],shelfLifeDays:[null as number|null,Validators.min(0)],active:[true],notes:[''],ingredients:this.fb.array([this.ingredientGroup()])});
- get ingredients(){return this.form.controls.ingredients as FormArray;}
- constructor(){this.load();}
- protected load(){this.loading.set(true);forkJoin({recipes:this.api.recipes(this.filters.getRawValue() as Record<string,string|boolean|undefined>),items:this.inventory.items({active:true,size:100,page:0})}).pipe(finalize(()=>this.loading.set(false))).subscribe({next:r=>{this.recipes.set(r.recipes);this.items.set(r.items.content);},error:()=>this.error('production.loadError')});}
- protected clear(){this.filters.reset({search:'',outputItemId:'',active:undefined});this.load();}
- protected open(recipe?:Recipe){this.editing.set(recipe);this.ingredients.clear();(recipe?.ingredients??[undefined]).forEach(i=>this.ingredients.push(this.ingredientGroup(i)));this.form.patchValue(recipe?{name:recipe.name,outputItemId:recipe.outputItemId,yieldQuantity:recipe.yieldQuantity,yieldUnit:recipe.yieldUnit,shelfLifeDays:recipe.shelfLifeDays??null,active:recipe.active,notes:recipe.notes??''}:{name:'',outputItemId:'',yieldQuantity:null,yieldUnit:'UNIT',shelfLifeDays:null,active:true,notes:''});this.dialog.set(true);}
- protected addIngredient(){this.ingredients.push(this.ingredientGroup());}protected removeIngredient(index:number){if(this.ingredients.length>1)this.ingredients.removeAt(index);}
- protected view(recipe:Recipe){this.selected.set(recipe);this.viewDialog.set(true);}
- protected save(){if(this.form.invalid||this.submitting())return;this.submitting.set(true);const raw=this.form.getRawValue();const input:RecipeInput={name:raw.name!,outputItemId:raw.outputItemId!,yieldQuantity:raw.yieldQuantity!,yieldUnit:raw.yieldUnit!,shelfLifeDays:raw.shelfLifeDays??undefined,active:raw.active!,notes:raw.notes||undefined,ingredients:raw.ingredients.map(i=>({itemId:i.itemId!,quantity:i.quantity!,unit:i.unit!}))};this.api.saveRecipe(input,this.editing()?.id).pipe(finalize(()=>this.submitting.set(false))).subscribe({next:()=>{this.dialog.set(false);this.success(this.editing()?'recipes.updated':'recipes.created');this.load();},error:()=>this.error('recipes.saveError')});}
- protected toggle(recipe:Recipe){this.confirmations.confirm({header:this.i18n.translate('recipes.toggleTitle'),message:recipe.name,accept:()=>this.api.setRecipeActive(recipe.id,!recipe.active).subscribe({next:()=>{this.success('recipes.statusUpdated');this.load();},error:()=>this.error('recipes.saveError')})});}
- protected itemName(id:string){return this.items().find(i=>i.id===id)?.name??'';}
- private ingredientGroup(value?:Recipe['ingredients'][number]){return this.fb.group({itemId:[value?.itemId??'',Validators.required],quantity:[value?.quantity??null as number|null,[Validators.required,Validators.min(0.001)]],unit:[value?.unit??'KG' as UnitOfMeasure,Validators.required]});}
- private success(key:string){this.messages.add({severity:'success',summary:this.i18n.translate('common.success'),detail:this.i18n.translate(key)});}private error(key:string){this.messages.add({severity:'error',summary:this.i18n.translate('common.error'),detail:this.i18n.translate(key)});}
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { LocalizedNumberPipe } from '../../../core/i18n/localized-number.pipe';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { InventoryService } from '../../../features/inventory/inventory.service';
+import { Item, UnitOfMeasure } from '../../../features/inventory/inventory.models';
+import { ProductionService } from '../../../features/production/production.service';
+import { Recipe, RecipeInput } from '../../../features/production/production.models';
+import { AuthService } from '../../../core/auth/auth.service';
+@Component({
+  selector: 'app-recipes-page',
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    DialogModule,
+    InputNumberModule,
+    InputTextModule,
+    SelectModule,
+    TableModule,
+    TagModule,
+    TextareaModule,
+    TooltipModule,
+    TranslatePipe,
+    LocalizedNumberPipe,
+  ],
+  templateUrl: './recipes-page.component.html',
+  styleUrls: ['../../inventory/inventory-page.scss', '../production-page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class RecipesPageComponent {
+  private fb = inject(FormBuilder);
+  private api = inject(ProductionService);
+  private inventory = inject(InventoryService);
+  private messages = inject(MessageService);
+  private confirmations = inject(ConfirmationService);
+  protected i18n = inject(I18nService);
+  protected auth = inject(AuthService);
+  protected loading = signal(false);
+  protected submitting = signal(false);
+  protected recipes = signal<Recipe[]>([]);
+  protected items = signal<Item[]>([]);
+  protected dialog = signal(false);
+  protected viewDialog = signal(false);
+  protected editing = signal<Recipe | undefined>(undefined);
+  protected selected = signal<Recipe | undefined>(undefined);
+  protected statuses = computed(() => [
+    { label: this.i18n.translate('common.active'), value: true },
+    { label: this.i18n.translate('common.inactive'), value: false },
+  ]);
+  protected units = computed(() =>
+    ['UNIT', 'KG', 'G', 'L', 'ML'].map((value) => ({
+      label: this.i18n.translate(`enum.unit.${value}`),
+      value,
+    })),
+  );
+  protected filters = this.fb.group({
+    search: [''],
+    outputItemId: [''],
+    active: [undefined as boolean | undefined],
+  });
+  protected form = this.fb.group({
+    name: ['', Validators.required],
+    outputItemId: ['', Validators.required],
+    yieldQuantity: [null as number | null, [Validators.required, Validators.min(0.001)]],
+    yieldUnit: ['UNIT' as UnitOfMeasure, Validators.required],
+    shelfLifeDays: [null as number | null, Validators.min(0)],
+    active: [true],
+    notes: [''],
+    ingredients: this.fb.array([this.ingredientGroup()]),
+  });
+  get ingredients() {
+    return this.form.controls.ingredients as FormArray;
+  }
+  constructor() {
+    this.load();
+  }
+  protected load() {
+    this.loading.set(true);
+    forkJoin({
+      recipes: this.api.recipes(
+        this.filters.getRawValue() as Record<string, string | boolean | undefined>,
+      ),
+      items: this.inventory.items({ active: true, size: 100, page: 0 }),
+    })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (r) => {
+          this.recipes.set(r.recipes);
+          this.items.set(r.items.content);
+        },
+        error: () => this.error('production.loadError'),
+      });
+  }
+  protected clear() {
+    this.filters.reset({ search: '', outputItemId: '', active: undefined });
+    this.load();
+  }
+  protected open(recipe?: Recipe) {
+    this.editing.set(recipe);
+    this.ingredients.clear();
+    (recipe?.ingredients ?? [undefined]).forEach((i) =>
+      this.ingredients.push(this.ingredientGroup(i)),
+    );
+    this.form.patchValue(
+      recipe
+        ? {
+            name: recipe.name,
+            outputItemId: recipe.outputItemId,
+            yieldQuantity: recipe.yieldQuantity,
+            yieldUnit: recipe.yieldUnit,
+            shelfLifeDays: recipe.shelfLifeDays ?? null,
+            active: recipe.active,
+            notes: recipe.notes ?? '',
+          }
+        : {
+            name: '',
+            outputItemId: '',
+            yieldQuantity: null,
+            yieldUnit: 'UNIT',
+            shelfLifeDays: null,
+            active: true,
+            notes: '',
+          },
+    );
+    this.dialog.set(true);
+  }
+  protected addIngredient() {
+    this.ingredients.push(this.ingredientGroup());
+  }
+  protected removeIngredient(index: number) {
+    if (this.ingredients.length > 1) this.ingredients.removeAt(index);
+  }
+  protected view(recipe: Recipe) {
+    this.selected.set(recipe);
+    this.viewDialog.set(true);
+  }
+  protected save() {
+    if (this.form.invalid || this.submitting()) return;
+    this.submitting.set(true);
+    const raw = this.form.getRawValue();
+    const input: RecipeInput = {
+      name: raw.name!,
+      outputItemId: raw.outputItemId!,
+      yieldQuantity: raw.yieldQuantity!,
+      yieldUnit: raw.yieldUnit!,
+      shelfLifeDays: raw.shelfLifeDays ?? undefined,
+      active: raw.active!,
+      notes: raw.notes || undefined,
+      ingredients: raw.ingredients.map((i) => ({
+        itemId: i.itemId!,
+        quantity: i.quantity!,
+        unit: i.unit!,
+      })),
+    };
+    this.api
+      .saveRecipe(input, this.editing()?.id)
+      .pipe(finalize(() => this.submitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.dialog.set(false);
+          this.success(this.editing() ? 'recipes.updated' : 'recipes.created');
+          this.load();
+        },
+        error: () => this.error('recipes.saveError'),
+      });
+  }
+  protected toggle(recipe: Recipe) {
+    this.confirmations.confirm({
+      header: this.i18n.translate('recipes.toggleTitle'),
+      message: recipe.name,
+      accept: () =>
+        this.api.setRecipeActive(recipe.id, !recipe.active).subscribe({
+          next: () => {
+            this.success('recipes.statusUpdated');
+            this.load();
+          },
+          error: () => this.error('recipes.saveError'),
+        }),
+    });
+  }
+  protected itemName(id: string) {
+    return this.items().find((i) => i.id === id)?.name ?? '';
+  }
+  private ingredientGroup(value?: Recipe['ingredients'][number]) {
+    return this.fb.group({
+      itemId: [value?.itemId ?? '', Validators.required],
+      quantity: [
+        value?.quantity ?? (null as number | null),
+        [Validators.required, Validators.min(0.001)],
+      ],
+      unit: [value?.unit ?? ('KG' as UnitOfMeasure), Validators.required],
+    });
+  }
+  private success(key: string) {
+    this.messages.add({
+      severity: 'success',
+      summary: this.i18n.translate('common.success'),
+      detail: this.i18n.translate(key),
+    });
+  }
+  private error(key: string) {
+    this.messages.add({
+      severity: 'error',
+      summary: this.i18n.translate('common.error'),
+      detail: this.i18n.translate(key),
+    });
+  }
 }

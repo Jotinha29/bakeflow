@@ -22,6 +22,7 @@ import {
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { LocalizedNumberPipe } from '../../../core/i18n/localized-number.pipe';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-items-page',
@@ -48,6 +49,7 @@ export class ItemsPageComponent {
   private readonly messages = inject(MessageService);
   private readonly confirmations = inject(ConfirmationService);
   protected readonly i18n = inject(I18nService);
+  protected readonly auth = inject(AuthService);
   protected readonly loading = signal(false);
   protected readonly submitting = signal(false);
   protected readonly lookupLoading = signal(false);

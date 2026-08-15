@@ -3,7 +3,7 @@
     <span class="kicker">{{ 'inventory.catalog' | translate }}</span>
     <h1>{{ 'items.title' | translate }}</h1>
   </div>
-  <p-button [label]="'items.create' | translate" icon="pi pi-plus" (onClick)="open()" />
+  @if (auth.can('ITEM_WRITE')) { <p-button [label]="'items.create' | translate" icon="pi pi-plus" (onClick)="open()" /> }
 </header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
@@ -88,7 +88,7 @@
               [pTooltip]="'common.view' | translate"
               [attr.aria-label]="('common.view' | translate) + ' ' + item.name"
               (onClick)="open(item)"
-            /><p-button
+            />@if (auth.can('ITEM_WRITE')) {<p-button
               icon="pi pi-pencil"
               [text]="true"
               severity="secondary"
@@ -102,7 +102,7 @@
               [pTooltip]="(item.active ? 'common.deactivate' : 'common.activate') | translate"
               [attr.aria-label]="((item.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + item.name"
               (onClick)="toggle(item)"
-            />
+            />}
           </div>
         </td></tr></ng-template
     ><ng-template #emptymessage
@@ -110,7 +110,7 @@
         <td colspan="8">
           <div class="empty">
             <p>{{ 'items.empty' | translate }}</p>
-            <p-button [label]="'items.create' | translate" [text]="true" (onClick)="open()" />
+            @if (auth.can('ITEM_WRITE')) { <p-button [label]="'items.create' | translate" [text]="true" (onClick)="open()" /> }
           </div>
         </td></tr></ng-template
   ></p-table>

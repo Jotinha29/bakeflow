@@ -16,6 +16,8 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 2s
+      repositories:
+        enabled: false
   flyway:
     enabled: true
 

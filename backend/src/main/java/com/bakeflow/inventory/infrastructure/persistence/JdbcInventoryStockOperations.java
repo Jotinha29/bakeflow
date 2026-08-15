@@ -40,7 +40,7 @@ public class JdbcInventoryStockOperations implements InventoryStockOperations {
     }
 
     @Override public void receive(UUID itemId, UUID batchId, UUID locationId, BigDecimal quantity, String reference) {
-        if (quantity == null || quantity.signum() < 0) throw new DomainException("INVALID_QUANTITY");
+        if (quantity == null || quantity.signum() <= 0) throw new DomainException("INVALID_QUANTITY");
         int changed = jdbc.update("UPDATE stock_balances SET quantity=quantity+?, version=version+1, updated_at=? WHERE batch_id=? AND location_id=?",
             quantity, Timestamp.from(Instant.now()), batchId, locationId);
         if (changed == 0) jdbc.update("INSERT INTO stock_balances(id,item_id,batch_id,location_id,quantity,version,updated_at) VALUES(?,?,?,?,?,0,?)",
