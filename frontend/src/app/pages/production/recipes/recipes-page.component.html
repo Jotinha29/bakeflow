@@ -48,6 +48,7 @@
     [value]="recipes()"
     [loading]="loading()"
     [paginator]="true"
+    [alwaysShowPaginator]="false"
     [rows]="10"
     responsiveLayout="scroll"
     ><ng-template #header
@@ -79,6 +80,7 @@
               icon="pi pi-eye"
               [text]="true"
               [pTooltip]="'common.view' | translate"
+              [attr.aria-label]="('common.view' | translate) + ' ' + r.name"
               (onClick)="view(r)"
             />
             @if (auth.can('RECIPE_WRITE')) {
@@ -86,10 +88,15 @@
                 icon="pi pi-pencil"
                 [text]="true"
                 [pTooltip]="'common.edit' | translate"
+                [attr.aria-label]="('common.edit' | translate) + ' ' + r.name"
                 (onClick)="open(r)"
               /><p-button
                 [icon]="r.active ? 'pi pi-ban' : 'pi pi-check'"
                 [text]="true"
+                [pTooltip]="(r.active ? 'common.deactivate' : 'common.activate') | translate"
+                [attr.aria-label]="
+                  ((r.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + r.name
+                "
                 (onClick)="toggle(r)"
               />
             }
@@ -181,6 +188,8 @@
             icon="pi pi-trash"
             severity="danger"
             [text]="true"
+            [pTooltip]="'common.remove' | translate"
+            [attr.aria-label]="'common.remove' | translate"
             [disabled]="ingredients.length === 1"
             (onClick)="removeIngredient($index)"
           />

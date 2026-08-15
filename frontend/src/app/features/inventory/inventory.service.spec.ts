@@ -7,7 +7,9 @@ describe('InventoryService', () => {
   let service: InventoryService;
   let http: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     service = TestBed.inject(InventoryService);
     http = TestBed.inject(HttpTestingController);
   });
@@ -17,7 +19,10 @@ describe('InventoryService', () => {
     service.items({ active: null, page: undefined }).subscribe();
     expect(http.expectOne('/api/v1/items').request.params.keys()).toEqual([]);
     service.items({ active: false }).subscribe();
-    expect(http.expectOne((request) => request.url === '/api/v1/items' &&
-      request.params.get('active') === 'false')).toBeTruthy();
+    expect(
+      http.expectOne(
+        (request) => request.url === '/api/v1/items' && request.params.get('active') === 'false',
+      ),
+    ).toBeTruthy();
   });
 });

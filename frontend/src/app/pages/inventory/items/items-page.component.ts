@@ -59,10 +59,18 @@ export class ItemsPageComponent {
   protected readonly editing = signal<Item | undefined>(undefined);
   protected readonly product = signal<ProductInformation | undefined>(undefined);
   private applied: Record<string, string | number | boolean | undefined> = { page: 0, size: 10 };
-  protected readonly types = computed(() => ['RAW_MATERIAL', 'FINISHED_PRODUCT', 'PACKAGING', 'OTHER'].map(
-    (value) => ({ label: this.i18n.translate(`enum.itemType.${value}`), value })));
-  protected readonly units = computed(() => ['UNIT', 'KG', 'G', 'L', 'ML'].map((value) =>
-    ({ label: this.i18n.translate(`enum.unit.${value}`), value })));
+  protected readonly types = computed(() =>
+    ['RAW_MATERIAL', 'FINISHED_PRODUCT', 'PACKAGING', 'OTHER'].map((value) => ({
+      label: this.i18n.translate(`enum.itemType.${value}`),
+      value,
+    })),
+  );
+  protected readonly units = computed(() =>
+    ['UNIT', 'KG', 'G', 'L', 'ML'].map((value) => ({
+      label: this.i18n.translate(`enum.unit.${value}`),
+      value,
+    })),
+  );
   protected readonly statuses = computed(() => [
     { label: this.i18n.translate('common.active'), value: true },
     { label: this.i18n.translate('common.inactive'), value: false },
@@ -165,8 +173,13 @@ export class ItemsPageComponent {
   }
   protected toggle(item: Item) {
     this.confirmations.confirm({
-      header: this.i18n.translate('items.confirmHeader', { action: this.i18n.translate(item.active ? 'common.deactivate' : 'common.activate') }),
-      message: this.i18n.translate('items.confirmMessage', { name: item.name, availability: this.i18n.translate(item.active ? 'items.unavailable' : 'items.available') }),
+      header: this.i18n.translate('items.confirmHeader', {
+        action: this.i18n.translate(item.active ? 'common.deactivate' : 'common.activate'),
+      }),
+      message: this.i18n.translate('items.confirmMessage', {
+        name: item.name,
+        availability: this.i18n.translate(item.active ? 'items.unavailable' : 'items.available'),
+      }),
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: this.i18n.translate(item.active ? 'common.deactivate' : 'common.activate'),
       accept: () =>
@@ -206,7 +219,9 @@ export class ItemsPageComponent {
     const p = this.product();
     if (p?.name) this.form.controls.name.setValue(p.name);
   }
-  protected label(v: string) { return this.i18n.translate(`enum.itemType.${v}`); }
+  protected label(v: string) {
+    return this.i18n.translate(`enum.itemType.${v}`);
+  }
   private error(detail: string) {
     this.messages.add({ severity: 'error', summary: this.i18n.translate('common.error'), detail });
   }

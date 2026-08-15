@@ -5,8 +5,14 @@ import { provideRouter, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { authInterceptor } from './auth.interceptor';
 
-const user = { id: '1', name: 'Viewer', email: 'viewer@bakeflow.local', active: true,
-  roles: ['VIEWER'], permissions: ['ITEM_READ'] };
+const user = {
+  id: '1',
+  name: 'Viewer',
+  email: 'viewer@bakeflow.local',
+  active: true,
+  roles: ['VIEWER'],
+  permissions: ['ITEM_READ'],
+};
 
 describe('AuthService and interceptor', () => {
   let auth: AuthService;
@@ -14,11 +20,13 @@ describe('AuthService and interceptor', () => {
   let router: Router;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [
-      provideRouter([]),
-      provideHttpClient(withInterceptors([authInterceptor])),
-      provideHttpClientTesting(),
-    ] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
     auth = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
@@ -32,9 +40,13 @@ describe('AuthService and interceptor', () => {
 
     const client = TestBed.inject(HttpClient);
     client.get('/api/v1/items').subscribe();
-    expect(http.expectOne('/api/v1/items').request.headers.get('Authorization')).toBe('Bearer access');
+    expect(http.expectOne('/api/v1/items').request.headers.get('Authorization')).toBe(
+      'Bearer access',
+    );
     client.get('https://example.com/data').subscribe();
-    expect(http.expectOne('https://example.com/data').request.headers.has('Authorization')).toBe(false);
+    expect(http.expectOne('https://example.com/data').request.headers.has('Authorization')).toBe(
+      false,
+    );
   });
 
   it('shares one refresh request among five concurrent subscribers', () => {

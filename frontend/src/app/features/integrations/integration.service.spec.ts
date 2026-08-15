@@ -1,2 +1,32 @@
-import { TestBed } from '@angular/core/testing';import { provideHttpClient } from '@angular/common/http';import { provideHttpClientTesting,HttpTestingController } from '@angular/common/http/testing';import { IntegrationService } from './integration.service';
-describe('IntegrationService',()=>{let service:IntegrationService;let http:HttpTestingController;beforeEach(()=>{TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});service=TestBed.inject(IntegrationService);http=TestBed.inject(HttpTestingController);});afterEach(()=>http.verify());it('queries normalized products through the backend',()=>{service.product('789').subscribe(v=>expect(v.source).toBe('OPEN_FOOD_FACTS'));http.expectOne('/api/v1/integrations/product/789').flush({status:'FOUND',barcode:'789',categories:[],source:'OPEN_FOOD_FACTS',fresh:true});});it('encodes formatted company identifiers',()=>{service.company('19.131/0001').subscribe();expect(http.expectOne('/api/v1/integrations/company/19.131%2F0001').request.method).toBe('GET');});});
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { IntegrationService } from './integration.service';
+describe('IntegrationService', () => {
+  let service: IntegrationService;
+  let http: HttpTestingController;
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(IntegrationService);
+    http = TestBed.inject(HttpTestingController);
+  });
+  afterEach(() => http.verify());
+  it('queries normalized products through the backend', () => {
+    service.product('789').subscribe((v) => expect(v.source).toBe('OPEN_FOOD_FACTS'));
+    http
+      .expectOne('/api/v1/integrations/product/789')
+      .flush({
+        status: 'FOUND',
+        barcode: '789',
+        categories: [],
+        source: 'OPEN_FOOD_FACTS',
+        fresh: true,
+      });
+  });
+  it('encodes formatted company identifiers', () => {
+    service.company('19.131/0001').subscribe();
+    expect(http.expectOne('/api/v1/integrations/company/19.131%2F0001').request.method).toBe('GET');
+  });
+});

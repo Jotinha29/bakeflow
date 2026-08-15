@@ -46,18 +46,22 @@ export class LocationsPageComponent {
   protected allLocations = signal<Location[]>([]);
   protected dialog = signal(false);
   protected editing = signal<Location | undefined>(undefined);
-  protected types = computed(() => [
-    'WAREHOUSE',
-    'ROOM',
-    'AISLE',
-    'SHELF',
-    'PALLET',
-    'PRODUCTION_AREA',
-    'COLD_STORAGE',
-    'OTHER',
-  ].map((value) => ({ label: this.i18n.translate(`enum.locationType.${value}`), value })));
-  protected statuses = computed(() => [{ label: this.i18n.translate('common.active'), value: true },
-    { label: this.i18n.translate('common.inactive'), value: false }]);
+  protected types = computed(() =>
+    [
+      'WAREHOUSE',
+      'ROOM',
+      'AISLE',
+      'SHELF',
+      'PALLET',
+      'PRODUCTION_AREA',
+      'COLD_STORAGE',
+      'OTHER',
+    ].map((value) => ({ label: this.i18n.translate(`enum.locationType.${value}`), value })),
+  );
+  protected statuses = computed(() => [
+    { label: this.i18n.translate('common.active'), value: true },
+    { label: this.i18n.translate('common.inactive'), value: false },
+  ]);
   protected filters = this.fb.group({
     search: [''],
     type: ['' as LocationType | ''],
@@ -142,7 +146,8 @@ export class LocationsPageComponent {
           this.dialog.set(false);
           this.messages.add({
             severity: 'success',
-            summary: this.i18n.translate('common.success'), detail: this.i18n.translate(this.editing() ? 'locations.updated' : 'locations.created'),
+            summary: this.i18n.translate('common.success'),
+            detail: this.i18n.translate(this.editing() ? 'locations.updated' : 'locations.created'),
           });
           this.loadTree();
         },
@@ -151,14 +156,22 @@ export class LocationsPageComponent {
   }
   protected toggle(l: Location) {
     this.confirmations.confirm({
-      header: this.i18n.translate('locations.confirmHeader', { action: this.i18n.translate(l.active ? 'common.deactivate' : 'common.activate') }),
-      message: this.i18n.translate('locations.confirmMessage', { name: l.name, availability: this.i18n.translate(l.active ? 'items.unavailable' : 'items.available') }),
+      header: this.i18n.translate('locations.confirmHeader', {
+        action: this.i18n.translate(l.active ? 'common.deactivate' : 'common.activate'),
+      }),
+      message: this.i18n.translate('locations.confirmMessage', {
+        name: l.name,
+        availability: this.i18n.translate(l.active ? 'items.unavailable' : 'items.available'),
+      }),
       accept: () =>
         this.api.setLocationActive(l.id, !l.active).subscribe({
           next: () => {
             this.messages.add({
               severity: 'success',
-              summary: this.i18n.translate('common.success'), detail: this.i18n.translate(l.active ? 'locations.deactivated' : 'locations.activated'),
+              summary: this.i18n.translate('common.success'),
+              detail: this.i18n.translate(
+                l.active ? 'locations.deactivated' : 'locations.activated',
+              ),
             });
             this.loadTree();
           },
@@ -166,7 +179,9 @@ export class LocationsPageComponent {
         }),
     });
   }
-  protected label(v: string) { return this.i18n.translate(`enum.locationType.${v}`); }
+  protected label(v: string) {
+    return this.i18n.translate(`enum.locationType.${v}`);
+  }
   private mapNodes(values: Location[]): TreeNode<Location>[] {
     return values.map((v) => this.node(v));
   }

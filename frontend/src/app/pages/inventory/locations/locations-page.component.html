@@ -1,6 +1,8 @@
 <header class="page-header">
   <div>
-    <span class="kicker">{{ 'inventory.catalog' | translate }}</span><h1>{{ 'locations.title' | translate }}</h1>
+    <span class="kicker">{{ 'inventory.physicalStructure' | translate }}</span>
+    <h1>{{ 'locations.title' | translate }}</h1>
+    <p>{{ 'locations.subtitle' | translate }}</p>
   </div>
   <p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />
 </header>
@@ -42,10 +44,13 @@
   </div>
 </form>
 <section class="card tree-card">
-  <div class="tree-title"><i class="pi pi-sitemap"></i><strong>{{ 'locations.structure' | translate }}</strong></div>
+  <div class="tree-title">
+    <i class="pi pi-sitemap"></i><strong>{{ 'locations.structure' | translate }}</strong>
+  </div>
   @if (!loading() && nodes().length === 0) {
     <div class="empty">
-      <p>{{ 'locations.empty' | translate }}</p><p-button [label]="'locations.create' | translate" [text]="true" (onClick)="open()" />
+      <p>{{ 'locations.empty' | translate }}</p>
+      <p-button [label]="'locations.create' | translate" [text]="true" (onClick)="open()" />
     </div>
   } @else {
     <p-tree [value]="nodes()" [loading]="loading()"
@@ -80,7 +85,11 @@
               [text]="true"
               [severity]="node.data.active ? 'danger' : 'success'"
               [pTooltip]="(node.data.active ? 'common.deactivate' : 'common.activate') | translate"
-              [attr.aria-label]="((node.data.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + node.label"
+              [attr.aria-label]="
+                ((node.data.active ? 'common.deactivate' : 'common.activate') | translate) +
+                ' ' +
+                node.label
+              "
               (onClick)="toggle(node.data)"
             />
           </div></div></ng-template

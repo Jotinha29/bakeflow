@@ -8,8 +8,10 @@ export class SystemStatusService {
   private readonly http = inject(HttpClient);
 
   getStatus(): Observable<SystemStatus> {
-    return this.http.get<SystemStatus>('/api/system/status').pipe(
-      catchError(() => of<SystemStatus>({ status: 'DOWN', postgres: 'DOWN', redis: 'DOWN' })),
-    );
+    return this.http
+      .get<SystemStatus>('/api/system/status')
+      .pipe(
+        catchError(() => of<SystemStatus>({ status: 'DOWN', postgres: 'DOWN', redis: 'DOWN' })),
+      );
   }
 }

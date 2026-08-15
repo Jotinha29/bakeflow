@@ -48,7 +48,8 @@ describe('LocationsPageComponent', () => {
         ConfirmationService,
       ],
     }).compileComponents();
-    const c = TestBed.createComponent(LocationsPageComponent).componentInstance as unknown as Harness;
+    const c = TestBed.createComponent(LocationsPageComponent)
+      .componentInstance as unknown as Harness;
     expect(c.nodes()[0]?.children?.[0]?.label).toBe('Shelf');
     c.open(undefined, parent);
     expect(c.form.controls.parentId.value).toBe('parent');

@@ -13,7 +13,16 @@ import { AuthService } from './core/auth/auth.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, ConfirmDialogModule, ToastModule, SelectModule, TranslatePipe, FormsModule],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    ConfirmDialogModule,
+    ToastModule,
+    SelectModule,
+    TranslatePipe,
+    FormsModule,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,7 +31,8 @@ export class AppComponent {
   protected readonly i18n = inject(I18nService);
   protected readonly auth = inject(AuthService);
   protected readonly languages: { label: string; value: Language }[] = [
-    { label: 'Português (Brasil)', value: 'pt-BR' }, { label: 'English', value: 'en' },
+    { label: 'Português (Brasil)', value: 'pt-BR' },
+    { label: 'English', value: 'en' },
   ];
   private readonly prime = inject(PrimeNG);
   constructor() {
@@ -30,5 +40,7 @@ export class AppComponent {
       this.prime.setTranslation(primeTranslations[this.i18n.language()] as Translation);
     });
   }
-  protected changeLanguage(language: Language): void { this.i18n.setLanguage(language); }
+  protected changeLanguage(language: Language): void {
+    this.i18n.setLanguage(language);
+  }
 }

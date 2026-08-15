@@ -27,7 +27,8 @@ import { LocalizedDatePipe } from '../../../core/i18n/localized-date.pipe';
     TableModule,
     TagModule,
     TooltipModule,
-    TranslatePipe, LocalizedDatePipe,
+    TranslatePipe,
+    LocalizedDatePipe,
   ],
   templateUrl: './batches-page.component.html',
   styleUrl: '../inventory-page.scss',
@@ -47,8 +48,10 @@ export class BatchesPageComponent {
   protected dialog = signal(false);
   protected editing = signal<Batch | undefined>(undefined);
   private applied: Record<string, string | number | boolean | undefined> = { page: 0, size: 10 };
-  protected statuses = computed(() => [{ label: this.i18n.translate('common.active'), value: true },
-    { label: this.i18n.translate('common.inactive'), value: false }]);
+  protected statuses = computed(() => [
+    { label: this.i18n.translate('common.active'), value: true },
+    { label: this.i18n.translate('common.inactive'), value: false },
+  ]);
   protected filters = this.fb.group({
     itemId: [''],
     code: [''],
@@ -149,7 +152,8 @@ export class BatchesPageComponent {
           this.dialog.set(false);
           this.messages.add({
             severity: 'success',
-            summary: this.i18n.translate('common.success'), detail: this.i18n.translate(this.editing() ? 'batches.updated' : 'batches.created'),
+            summary: this.i18n.translate('common.success'),
+            detail: this.i18n.translate(this.editing() ? 'batches.updated' : 'batches.created'),
           });
           this.load();
         },
@@ -158,14 +162,20 @@ export class BatchesPageComponent {
   }
   protected toggle(b: Batch) {
     this.confirmations.confirm({
-      header: this.i18n.translate('batches.confirmHeader', { action: this.i18n.translate(b.active ? 'common.deactivate' : 'common.activate') }),
-      message: this.i18n.translate('batches.confirmMessage', { code: b.code, availability: this.i18n.translate(b.active ? 'items.unavailable' : 'items.available') }),
+      header: this.i18n.translate('batches.confirmHeader', {
+        action: this.i18n.translate(b.active ? 'common.deactivate' : 'common.activate'),
+      }),
+      message: this.i18n.translate('batches.confirmMessage', {
+        code: b.code,
+        availability: this.i18n.translate(b.active ? 'items.unavailable' : 'items.available'),
+      }),
       accept: () =>
         this.api.setBatchActive(b.id, !b.active).subscribe({
           next: () => {
             this.messages.add({
               severity: 'success',
-              summary: this.i18n.translate('common.success'), detail: this.i18n.translate(b.active ? 'batches.deactivated' : 'batches.activated'),
+              summary: this.i18n.translate('common.success'),
+              detail: this.i18n.translate(b.active ? 'batches.deactivated' : 'batches.activated'),
             });
             this.load();
           },

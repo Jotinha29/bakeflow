@@ -1,6 +1,8 @@
 <header class="page-header">
   <div>
-    <span class="kicker">{{ 'inventory.catalog' | translate }}</span><h1>{{ 'batches.title' | translate }}</h1>
+    <span class="kicker">{{ 'inventory.traceability' | translate }}</span>
+    <h1>{{ 'batches.title' | translate }}</h1>
+    <p>{{ 'batches.subtitle' | translate }}</p>
   </div>
   <p-button [label]="'batches.create' | translate" icon="pi pi-plus" (onClick)="open()" />
 </header>
@@ -17,7 +19,8 @@
     />
   </div>
   <div class="field">
-    <label for="batch-code">{{ 'common.code' | translate }}</label><input pInputText id="batch-code" formControlName="code" />
+    <label for="batch-code">{{ 'common.code' | translate }}</label
+    ><input pInputText id="batch-code" formControlName="code" />
   </div>
   <div class="field">
     <label for="batch-status">{{ 'common.status' | translate }}</label
@@ -37,7 +40,11 @@
         formControlName="expirationFrom"
         [placeholder]="'batches.from' | translate"
         [dateFormat]="i18n.dateFormat()"
-      /><p-datepicker formControlName="expirationTo" [placeholder]="'batches.to' | translate" [dateFormat]="i18n.dateFormat()" />
+      /><p-datepicker
+        formControlName="expirationTo"
+        [placeholder]="'batches.to' | translate"
+        [dateFormat]="i18n.dateFormat()"
+      />
     </div>
   </div>
   <div class="actions">
@@ -56,14 +63,18 @@
     [loading]="loading()"
     [lazy]="true"
     [paginator]="true"
+    [alwaysShowPaginator]="false"
     [rows]="10"
     [totalRecords]="total()"
     (onPage)="page($event)"
     ><ng-template #header
       ><tr>
-        <th>{{ 'common.code' | translate }}</th><th>{{ 'batches.item' | translate }}</th>
-        <th>{{ 'batches.manufacturingDate' | translate }}</th><th>{{ 'batches.expirationDate' | translate }}</th>
-        <th>{{ 'common.status' | translate }}</th><th>{{ 'common.actions' | translate }}</th>
+        <th>{{ 'common.code' | translate }}</th>
+        <th>{{ 'batches.item' | translate }}</th>
+        <th>{{ 'batches.manufacturingDate' | translate }}</th>
+        <th>{{ 'batches.expirationDate' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th>
+        <th>{{ 'common.actions' | translate }}</th>
       </tr></ng-template
     ><ng-template #body let-b
       ><tr>
@@ -71,7 +82,8 @@
           <strong>{{ b.code }}</strong>
         </td>
         <td>{{ b.itemName }}</td>
-        <td>{{ b.manufacturingDate | localizedDate }}</td><td>{{ b.expirationDate | localizedDate }}</td>
+        <td>{{ b.manufacturingDate | localizedDate }}</td>
+        <td>{{ b.expirationDate | localizedDate }}</td>
         <td>
           <p-tag
             [value]="(b.active ? 'common.active' : 'common.inactive') | translate"
@@ -99,7 +111,9 @@
               [text]="true"
               [severity]="b.active ? 'danger' : 'success'"
               [pTooltip]="(b.active ? 'common.deactivate' : 'common.activate') | translate"
-              [attr.aria-label]="((b.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + b.code"
+              [attr.aria-label]="
+                ((b.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + b.code
+              "
               (onClick)="toggle(b)"
             />
           </div>
@@ -108,7 +122,8 @@
       ><tr>
         <td colspan="6">
           <div class="empty">
-            <p>{{ 'batches.empty' | translate }}</p><p-button [label]="'batches.create' | translate" [text]="true" (onClick)="open()" />
+            <p>{{ 'batches.empty' | translate }}</p>
+            <p-button [label]="'batches.create' | translate" [text]="true" (onClick)="open()" />
           </div>
         </td></tr></ng-template
   ></p-table>
@@ -138,11 +153,19 @@
       </div>
       <div class="field">
         <label for="manufacturing-date">{{ 'batches.manufacturingDate' | translate }}</label
-        ><p-datepicker inputId="manufacturing-date" formControlName="manufacturingDate" [dateFormat]="i18n.dateFormat()" />
+        ><p-datepicker
+          inputId="manufacturing-date"
+          formControlName="manufacturingDate"
+          [dateFormat]="i18n.dateFormat()"
+        />
       </div>
       <div class="field">
         <label for="expiration-date">{{ 'batches.expirationDate' | translate }}</label
-        ><p-datepicker inputId="expiration-date" formControlName="expirationDate" [dateFormat]="i18n.dateFormat()" />
+        ><p-datepicker
+          inputId="expiration-date"
+          formControlName="expirationDate"
+          [dateFormat]="i18n.dateFormat()"
+        />
         @if (invalidDates()) {
           <span class="error">{{ 'batches.dateInvalid' | translate }}</span>
         }

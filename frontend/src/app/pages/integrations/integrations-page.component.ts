@@ -1,3 +1,64 @@
-import { Component,inject,signal } from '@angular/core';import { FormsModule } from '@angular/forms';import { HttpErrorResponse } from '@angular/common/http';import { ButtonModule } from 'primeng/button';import { CardModule } from 'primeng/card';import { TagModule } from 'primeng/tag';import { TranslatePipe } from '../../core/i18n/translate.pipe';import { IntegrationService } from '../../features/integrations/integration.service';import { ExternalCompany,ExternalProduct,IntegrationStatus } from '../../features/integrations/integration.models';
-@Component({standalone:true,selector:'app-integrations-page',imports:[FormsModule,ButtonModule,CardModule,TagModule,TranslatePipe],templateUrl:'./integrations-page.component.html',styleUrl:'./integrations-page.component.scss'})
-export class IntegrationsPageComponent{private api=inject(IntegrationService);status=signal<IntegrationStatus|null>(null);productResult=signal<ExternalProduct|null>(null);companyResult=signal<ExternalCompany|null>(null);productState=signal('initial');companyState=signal('initial');barcode='';cnpj='';constructor(){this.api.status().subscribe({next:v=>this.status.set(v),error:()=>this.status.set(null)});}searchProduct(){if(!this.barcode)return;this.productState.set('loading');this.api.product(this.barcode).subscribe({next:v=>{this.productResult.set(v);this.productState.set(v.status==='FOUND'?'success':'notFound');},error:e=>this.productState.set(this.errorState(e))});}searchCompany(){if(!this.cnpj)return;this.companyState.set('loading');this.api.company(this.cnpj).subscribe({next:v=>{this.companyResult.set(v);this.companyState.set(v.status==='FOUND'?'success':'notFound');},error:e=>this.companyState.set(this.errorState(e))});}private errorState(e:HttpErrorResponse){return e.status===429?'rateLimited':e.error?.message==='EXTERNAL_SERVICE_TIMEOUT'?'timeout':'unavailable';}}
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { IntegrationService } from '../../features/integrations/integration.service';
+import {
+  ExternalCompany,
+  ExternalProduct,
+  IntegrationStatus,
+} from '../../features/integrations/integration.models';
+@Component({
+  standalone: true,
+  selector: 'app-integrations-page',
+  imports: [FormsModule, ButtonModule, CardModule, TagModule, TranslatePipe],
+  templateUrl: './integrations-page.component.html',
+  styleUrl: './integrations-page.component.scss',
+})
+export class IntegrationsPageComponent {
+  private api = inject(IntegrationService);
+  status = signal<IntegrationStatus | null>(null);
+  productResult = signal<ExternalProduct | null>(null);
+  companyResult = signal<ExternalCompany | null>(null);
+  productState = signal('initial');
+  companyState = signal('initial');
+  barcode = '';
+  cnpj = '';
+  constructor() {
+    this.api
+      .status()
+      .subscribe({ next: (v) => this.status.set(v), error: () => this.status.set(null) });
+  }
+  searchProduct() {
+    if (!this.barcode) return;
+    this.productState.set('loading');
+    this.api.product(this.barcode).subscribe({
+      next: (v) => {
+        this.productResult.set(v);
+        this.productState.set(v.status === 'FOUND' ? 'success' : 'notFound');
+      },
+      error: (e) => this.productState.set(this.errorState(e)),
+    });
+  }
+  searchCompany() {
+    if (!this.cnpj) return;
+    this.companyState.set('loading');
+    this.api.company(this.cnpj).subscribe({
+      next: (v) => {
+        this.companyResult.set(v);
+        this.companyState.set(v.status === 'FOUND' ? 'success' : 'notFound');
+      },
+      error: (e) => this.companyState.set(this.errorState(e)),
+    });
+  }
+  private errorState(e: HttpErrorResponse) {
+    return e.status === 429
+      ? 'rateLimited'
+      : e.error?.message === 'EXTERNAL_SERVICE_TIMEOUT'
+        ? 'timeout'
+        : 'unavailable';
+  }
+}

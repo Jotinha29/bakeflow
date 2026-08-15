@@ -1,1 +1,27 @@
-export interface AuthUser{id:string;name:string;email:string;active:boolean;lastLoginAt?:string;roles:string[];permissions:string[];}export interface TokenResponse{accessToken:string;user:AuthUser;}export interface AuthSession{id:string;createdAt:string;lastUsedAt?:string;expiresAt:string;userAgent?:string;current:boolean;}export interface UserPage{content:AuthUser[];total:number;page:number;size:number;}
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  active: boolean;
+  lastLoginAt?: string;
+  roles: string[];
+  permissions: string[];
+}
+export interface TokenResponse {
+  accessToken: string;
+  user: AuthUser;
+}
+export interface AuthSession {
+  id: string;
+  createdAt: string;
+  lastUsedAt?: string;
+  expiresAt: string;
+  userAgent?: string;
+  current: boolean;
+}
+export interface UserPage {
+  content: AuthUser[];
+  total: number;
+  page: number;
+  size: number;
+}

@@ -2,8 +2,11 @@
   <div>
     <span class="kicker">{{ 'inventory.catalog' | translate }}</span>
     <h1>{{ 'items.title' | translate }}</h1>
+    <p>{{ 'items.subtitle' | translate }}</p>
   </div>
-  @if (auth.can('ITEM_WRITE')) { <p-button [label]="'items.create' | translate" icon="pi pi-plus" (onClick)="open()" /> }
+  @if (auth.can('ITEM_WRITE')) {
+    <p-button [label]="'items.create' | translate" icon="pi pi-plus" (onClick)="open()" />
+  }
 </header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
@@ -51,6 +54,7 @@
     [loading]="loading()"
     [lazy]="true"
     [paginator]="true"
+    [alwaysShowPaginator]="false"
     [rows]="10"
     [totalRecords]="total()"
     (onPage)="page($event)"
@@ -59,9 +63,12 @@
       ><tr>
         <th>{{ 'common.name' | translate }}</th>
         <th>SKU</th>
-        <th>{{ 'items.barcode' | translate }}</th><th>{{ 'common.type' | translate }}</th>
-        <th>{{ 'items.unit' | translate }}</th><th>{{ 'items.minimumStock' | translate }}</th>
-        <th>{{ 'common.status' | translate }}</th><th>{{ 'common.actions' | translate }}</th>
+        <th>{{ 'items.barcode' | translate }}</th>
+        <th>{{ 'common.type' | translate }}</th>
+        <th>{{ 'items.unit' | translate }}</th>
+        <th>{{ 'items.minimumStock' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th>
+        <th>{{ 'common.actions' | translate }}</th>
       </tr></ng-template
     ><ng-template #body let-item
       ><tr>
@@ -88,21 +95,28 @@
               [pTooltip]="'common.view' | translate"
               [attr.aria-label]="('common.view' | translate) + ' ' + item.name"
               (onClick)="open(item)"
-            />@if (auth.can('ITEM_WRITE')) {<p-button
-              icon="pi pi-pencil"
-              [text]="true"
-              severity="secondary"
-              [pTooltip]="'common.edit' | translate"
-              [attr.aria-label]="('common.edit' | translate) + ' ' + item.name"
-              (onClick)="open(item)"
-            /><p-button
-              [icon]="item.active ? 'pi pi-ban' : 'pi pi-check'"
-              [text]="true"
-              [severity]="item.active ? 'danger' : 'success'"
-              [pTooltip]="(item.active ? 'common.deactivate' : 'common.activate') | translate"
-              [attr.aria-label]="((item.active ? 'common.deactivate' : 'common.activate') | translate) + ' ' + item.name"
-              (onClick)="toggle(item)"
-            />}
+            />
+            @if (auth.can('ITEM_WRITE')) {
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                severity="secondary"
+                [pTooltip]="'common.edit' | translate"
+                [attr.aria-label]="('common.edit' | translate) + ' ' + item.name"
+                (onClick)="open(item)"
+              /><p-button
+                [icon]="item.active ? 'pi pi-ban' : 'pi pi-check'"
+                [text]="true"
+                [severity]="item.active ? 'danger' : 'success'"
+                [pTooltip]="(item.active ? 'common.deactivate' : 'common.activate') | translate"
+                [attr.aria-label]="
+                  ((item.active ? 'common.deactivate' : 'common.activate') | translate) +
+                  ' ' +
+                  item.name
+                "
+                (onClick)="toggle(item)"
+              />
+            }
           </div>
         </td></tr></ng-template
     ><ng-template #emptymessage
@@ -110,7 +124,9 @@
         <td colspan="8">
           <div class="empty">
             <p>{{ 'items.empty' | translate }}</p>
-            @if (auth.can('ITEM_WRITE')) { <p-button [label]="'items.create' | translate" [text]="true" (onClick)="open()" /> }
+            @if (auth.can('ITEM_WRITE')) {
+              <p-button [label]="'items.create' | translate" [text]="true" (onClick)="open()" />
+            }
           </div>
         </td></tr></ng-template
   ></p-table>
@@ -124,7 +140,8 @@
   ><form [formGroup]="form" (ngSubmit)="save()">
     <div class="form-grid">
       <div class="field wide">
-        <label for="name">{{ 'common.name' | translate }} *</label><input pInputText id="name" formControlName="name" />
+        <label for="name">{{ 'common.name' | translate }} *</label
+        ><input pInputText id="name" formControlName="name" />
         @if (form.controls.name.touched && form.controls.name.invalid) {
           <span class="error">{{ 'items.nameRequired' | translate }}</span>
         }

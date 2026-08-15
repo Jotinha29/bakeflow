@@ -13,8 +13,10 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
-export const permissionGuard = (permission: string): CanActivateFn => () => {
-  const auth = inject(AuthService);
-  const router = inject(Router);
-  return auth.can(permission) || router.createUrlTree(['/']);
-};
+export const permissionGuard =
+  (permission: string): CanActivateFn =>
+  () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+    return auth.can(permission) || router.createUrlTree(['/']);
+  };

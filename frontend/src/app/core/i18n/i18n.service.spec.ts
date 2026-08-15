@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { I18nService } from './i18n.service';
 import { LocalizedDatePipe } from './localized-date.pipe';
 import { LocalizedNumberPipe } from './localized-number.pipe';
+import { LocalizedDateTimePipe } from './localized-date-time.pipe';
+import { RoleLabelPipe } from './role-label.pipe';
 
 describe('I18nService', () => {
   beforeEach(() => {
@@ -38,6 +40,23 @@ describe('I18nService', () => {
     service.setLanguage('en');
     expect(date.transform('2026-08-09')).toBe('8/9/2026');
     expect(number.transform(1250.5)).toBe('1,250.5');
+  });
+
+  it('formats timestamps in the active locale and translates role labels centrally', () => {
+    const service = TestBed.inject(I18nService);
+    const dateTime = TestBed.runInInjectionContext(() => new LocalizedDateTimePipe());
+    const role = TestBed.runInInjectionContext(() => new RoleLabelPipe());
+    const timestamp = '2026-08-14T22:32:42Z';
+    expect(dateTime.transform(timestamp)).toBe(
+      new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(new Date(timestamp)),
+    );
+    expect(role.transform('ADMIN')).toBe('Administrador');
+    service.setLanguage('en');
+    expect(role.transform('VIEWER')).toBe('Viewer');
+    expect(dateTime.transform(undefined)).toBe('Never');
   });
 
   it('does not translate persisted user data', () => {

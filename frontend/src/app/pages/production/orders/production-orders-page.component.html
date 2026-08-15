@@ -52,6 +52,7 @@
     [value]="orders()"
     [loading]="loading()"
     [paginator]="true"
+    [alwaysShowPaginator]="false"
     [rows]="10"
     responsiveLayout="scroll"
     ><ng-template #header
@@ -86,6 +87,7 @@
             icon="pi pi-eye"
             [text]="true"
             [pTooltip]="'common.view' | translate"
+            [attr.aria-label]="('common.view' | translate) + ' ' + o.code"
             (onClick)="openDetails(o)"
           />
         </td></tr></ng-template

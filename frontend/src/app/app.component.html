@@ -1,1 +1,66 @@
-@if(auth.user()){<div class="app-shell"><aside class="sidebar"><a class="brand" routerLink="/"><span class="brand-mark">B</span><span>BakeFlow</span></a><nav><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><i class="pi pi-home"></i>{{'nav.dashboard'|translate}}</a><span class="nav-section">{{'nav.inventory'|translate}}</span><a routerLink="/inventory/items" routerLinkActive="active"><i class="pi pi-box"></i>{{'nav.items'|translate}}</a><a routerLink="/inventory/batches" routerLinkActive="active"><i class="pi pi-tags"></i>{{'nav.batches'|translate}}</a><a routerLink="/inventory/locations" routerLinkActive="active"><i class="pi pi-sitemap"></i>{{'nav.locations'|translate}}</a></nav><nav class="production-nav"><span class="nav-section">{{'nav.production'|translate}}</span><a routerLink="/recipes" routerLinkActive="active"><i class="pi pi-book"></i>{{'nav.recipes'|translate}}</a><a routerLink="/production-orders" routerLinkActive="active"><i class="pi pi-clipboard"></i>{{'nav.productionOrders'|translate}}</a></nav><nav class="system-nav"><span class="nav-section">{{'nav.system'|translate}}</span><a routerLink="/integrations" routerLinkActive="active"><i class="pi pi-link"></i>{{'nav.integrations'|translate}}</a></nav>@if(auth.can('USER_READ')){<nav class="system-nav"><span class="nav-section">{{'nav.administration'|translate}}</span><a routerLink="/users" routerLinkActive="active"><i class="pi pi-users"></i>{{'nav.users'|translate}}</a></nav>}<a class="account-link" routerLink="/account"><i class="pi pi-user"></i>{{'nav.account'|translate}}</a><div class="language-selector"><label for="language"><i class="pi pi-globe"></i> {{'language.label'|translate}}</label><p-select inputId="language" [options]="languages" optionLabel="label" optionValue="value" [ngModel]="i18n.language()" (ngModelChange)="changeLanguage($event)" appendTo="body"/></div></aside><div class="content"><header><span class="eyebrow">{{'app.workspace'|translate}}</span><span class="environment"><span></span>{{auth.user()?.name}}</span></header><main><router-outlet/></main></div></div>}@else{<router-outlet/>}<p-toast position="bottom-right"/><p-confirmdialog/>
+@if (auth.user()) {
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" routerLink="/"><span class="brand-mark">B</span><span>BakeFlow</span></a>
+      <nav>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+          ><i class="pi pi-home"></i>{{ 'nav.dashboard' | translate }}</a
+        ><span class="nav-section">{{ 'nav.inventory' | translate }}</span
+        ><a routerLink="/inventory/items" routerLinkActive="active"
+          ><i class="pi pi-box"></i>{{ 'nav.items' | translate }}</a
+        ><a routerLink="/inventory/batches" routerLinkActive="active"
+          ><i class="pi pi-tags"></i>{{ 'nav.batches' | translate }}</a
+        ><a routerLink="/inventory/locations" routerLinkActive="active"
+          ><i class="pi pi-sitemap"></i>{{ 'nav.locations' | translate }}</a
+        >
+      </nav>
+      <nav class="production-nav">
+        <span class="nav-section">{{ 'nav.production' | translate }}</span
+        ><a routerLink="/recipes" routerLinkActive="active"
+          ><i class="pi pi-book"></i>{{ 'nav.recipes' | translate }}</a
+        ><a routerLink="/production-orders" routerLinkActive="active"
+          ><i class="pi pi-clipboard"></i>{{ 'nav.productionOrders' | translate }}</a
+        >
+      </nav>
+      <nav class="system-nav">
+        <span class="nav-section">{{ 'nav.system' | translate }}</span
+        ><a routerLink="/integrations" routerLinkActive="active"
+          ><i class="pi pi-link"></i>{{ 'nav.integrations' | translate }}</a
+        >
+      </nav>
+      @if (auth.can('USER_READ')) {
+        <nav class="system-nav">
+          <span class="nav-section">{{ 'nav.administration' | translate }}</span
+          ><a routerLink="/users" routerLinkActive="active"
+            ><i class="pi pi-users"></i>{{ 'nav.users' | translate }}</a
+          >
+        </nav>
+      }
+      <a class="account-link" routerLink="/account"
+        ><i class="pi pi-user"></i>{{ 'nav.account' | translate }}</a
+      >
+      <div class="language-selector">
+        <label for="language"><i class="pi pi-globe"></i> {{ 'language.label' | translate }}</label
+        ><p-select
+          inputId="language"
+          [options]="languages"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="i18n.language()"
+          (ngModelChange)="changeLanguage($event)"
+          appendTo="body"
+        />
+      </div>
+    </aside>
+    <div class="content">
+      <header>
+        <span class="eyebrow">{{ 'app.workspace' | translate }}</span
+        ><span class="environment"><span></span>{{ auth.user()?.name }}</span>
+      </header>
+      <main><router-outlet /></main>
+    </div>
+  </div>
+} @else {
+  <router-outlet />
+}
+<p-toast position="bottom-right" /><p-confirmdialog />

@@ -1,6 +1,47 @@
-import { TestBed } from '@angular/core/testing';import { provideHttpClient } from '@angular/common/http';import { HttpTestingController,provideHttpClientTesting } from '@angular/common/http/testing';import { ProductionService } from './production.service';
-describe('ProductionService',()=>{let service:ProductionService;let http:HttpTestingController;beforeEach(()=>{TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});service=TestBed.inject(ProductionService);http=TestBed.inject(HttpTestingController);});afterEach(()=>http.verify());
- it('requests a non-persistent production preview',()=>{service.preview('recipe',500).subscribe();const request=http.expectOne('/api/v1/production-orders/preview');expect(request.request.method).toBe('POST');expect(request.request.body).toEqual({recipeId:'recipe',plannedQuantity:500});request.flush({recipe:{},plannedQuantity:500,requirements:[]});});
- it('uses explicit endpoints for protected transitions',()=>{service.start('order').subscribe();const start=http.expectOne('/api/v1/production-orders/order/start');expect(start.request.method).toBe('POST');start.flush({});service.complete('order',{actualQuantity:485,destinationLocationId:'location'}).subscribe();const complete=http.expectOne('/api/v1/production-orders/order/complete');expect(complete.request.method).toBe('POST');complete.flush({});service.cancel('order').subscribe();const cancel=http.expectOne('/api/v1/production-orders/order/cancel');expect(cancel.request.method).toBe('POST');cancel.flush({});});
- it('omits null and undefined filters but preserves false',()=>{service.recipes({active:null,search:undefined}).subscribe();expect(http.expectOne('/api/v1/recipes').request.params.keys()).toEqual([]);service.recipes({active:false}).subscribe();expect(http.expectOne(r=>r.url==='/api/v1/recipes'&&r.params.get('active')==='false')).toBeTruthy();});
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ProductionService } from './production.service';
+describe('ProductionService', () => {
+  let service: ProductionService;
+  let http: HttpTestingController;
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(ProductionService);
+    http = TestBed.inject(HttpTestingController);
+  });
+  afterEach(() => http.verify());
+  it('requests a non-persistent production preview', () => {
+    service.preview('recipe', 500).subscribe();
+    const request = http.expectOne('/api/v1/production-orders/preview');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ recipeId: 'recipe', plannedQuantity: 500 });
+    request.flush({ recipe: {}, plannedQuantity: 500, requirements: [] });
+  });
+  it('uses explicit endpoints for protected transitions', () => {
+    service.start('order').subscribe();
+    const start = http.expectOne('/api/v1/production-orders/order/start');
+    expect(start.request.method).toBe('POST');
+    start.flush({});
+    service
+      .complete('order', { actualQuantity: 485, destinationLocationId: 'location' })
+      .subscribe();
+    const complete = http.expectOne('/api/v1/production-orders/order/complete');
+    expect(complete.request.method).toBe('POST');
+    complete.flush({});
+    service.cancel('order').subscribe();
+    const cancel = http.expectOne('/api/v1/production-orders/order/cancel');
+    expect(cancel.request.method).toBe('POST');
+    cancel.flush({});
+  });
+  it('omits null and undefined filters but preserves false', () => {
+    service.recipes({ active: null, search: undefined }).subscribe();
+    expect(http.expectOne('/api/v1/recipes').request.params.keys()).toEqual([]);
+    service.recipes({ active: false }).subscribe();
+    expect(
+      http.expectOne((r) => r.url === '/api/v1/recipes' && r.params.get('active') === 'false'),
+    ).toBeTruthy();
+  });
 });

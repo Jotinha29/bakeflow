@@ -1,16 +1,17 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { I18nService } from './i18n.service';
 
-@Pipe({ name: 'localizedDate', standalone: true, pure: false })
-export class LocalizedDatePipe implements PipeTransform {
+@Pipe({ name: 'localizedDateTime', standalone: true, pure: false })
+export class LocalizedDateTimePipe implements PipeTransform {
   private readonly i18n = inject(I18nService);
+
   transform(value?: string | Date): string {
     if (!value) return this.i18n.translate('common.never');
-    const date =
-      typeof value === 'string'
-        ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value)
-        : value;
+    const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) return this.i18n.translate('common.never');
-    return new Intl.DateTimeFormat(this.i18n.locale()).format(date);
+    return new Intl.DateTimeFormat(this.i18n.locale(), {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(date);
   }
 }

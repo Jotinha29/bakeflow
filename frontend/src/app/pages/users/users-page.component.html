@@ -1,36 +1,165 @@
-<section class="page-header"><span class="eyebrow">{{'nav.administration'|translate}}</span>
-  <h1>{{'users.title'|translate}}</h1><p>{{'users.subtitle'|translate}}</p></section>
-<div class="filter-panel">
-  <input [(ngModel)]="search" (keyup.enter)="load()" [placeholder]="'users.search'|translate">
-  <p-select [(ngModel)]="status" [options]="statusOptions" optionValue="value"
-    [showClear]="true" [placeholder]="'common.status'|translate">
-    <ng-template #item let-option>{{option.label|translate}}</ng-template>
-    <ng-template #selectedItem let-option>{{option?.label|translate}}</ng-template>
-  </p-select>
-  <p-select [(ngModel)]="role" [options]="roleOptions" [showClear]="true"
-    [placeholder]="'users.role'|translate"/>
-  <p-button [label]="'common.clear'|translate" severity="secondary" [outlined]="true"
-    (onClick)="clearFilters()"/>
-  <p-button [label]="'common.filter'|translate" icon="pi pi-filter" (onClick)="load()"/>
-  <p-button [label]="'users.create'|translate" icon="pi pi-plus" (onClick)="open()"/>
-</div>
-<p-table [value]="users()" [loading]="loading()" [paginator]="true" [rows]="20"
-  [totalRecords]="total()" [lazy]="true" (onLazyLoad)="load(($event.first??0)/($event.rows??20))">
-  <ng-template #header><tr><th>{{'common.name'|translate}}</th><th>{{'auth.email'|translate}}</th>
-    <th>{{'users.role'|translate}}</th><th>{{'common.status'|translate}}</th>
-    <th>{{'users.lastLogin'|translate}}</th><th></th></tr></ng-template>
-  <ng-template #body let-user><tr><td>{{user.name}}</td><td>{{user.email}}</td>
-    <td>{{user.roles.join(', ')}}</td><td><p-tag [value]="(user.active?'common.active':'common.inactive')|translate"
-      [severity]="user.active?'success':'secondary'"/></td><td>{{user.lastLoginAt||'—'}}</td>
-    <td><p-button icon="pi pi-pencil" [text]="true" (onClick)="open(user)"/></td></tr></ng-template>
-</p-table>
-<p-dialog [header]="(editing?'users.edit':'users.create')|translate" [visible]="dialog()"
-  (visibleChange)="dialog.set($event)" [modal]="true">
-  <div class="form-grid"><label>{{'common.name'|translate}}<input [(ngModel)]="name"></label>
-    <label>{{'auth.email'|translate}}<input type="email" [(ngModel)]="email"></label>
-    @if(!editing){<label>{{'users.initialPassword'|translate}}<input type="password" [(ngModel)]="password"></label>}
-    <div><span>{{'users.role'|translate}}</span><p-multiselect [(ngModel)]="roles" [options]="roleOptions"/></div>
-    <label><input type="checkbox" [(ngModel)]="active"> {{'common.active'|translate}}</label>
-    <p-button [label]="'common.save'|translate" [loading]="saving()" (onClick)="save()"/>
+<header class="page-header">
+  <div class="page-header-copy">
+    <span class="eyebrow">{{ 'users.kicker' | translate }}</span>
+    <h1>{{ 'users.title' | translate }}</h1>
+    <p>{{ 'users.subtitle' | translate }}</p>
+  </div>
+  <p-button [label]="'users.create' | translate" icon="pi pi-plus" (onClick)="open()" />
+</header>
+
+<section class="filter-panel" [attr.aria-label]="'users.filters' | translate">
+  <div class="field">
+    <label for="user-search">{{ 'users.search' | translate }}</label>
+    <input id="user-search" pInputText [(ngModel)]="search" (keyup.enter)="load()" />
+  </div>
+  <div class="field">
+    <label for="user-status">{{ 'common.status' | translate }}</label>
+    <p-select
+      inputId="user-status"
+      [(ngModel)]="status"
+      [options]="statusOptions"
+      optionValue="value"
+      [showClear]="true"
+    >
+      <ng-template #item let-option>{{ option.label | translate }}</ng-template>
+      <ng-template #selectedItem let-option>{{ option?.label | translate }}</ng-template>
+    </p-select>
+  </div>
+  <div class="field">
+    <label for="user-role">{{ 'users.role' | translate }}</label>
+    <p-select inputId="user-role" [(ngModel)]="role" [options]="roleOptions" [showClear]="true">
+      <ng-template #item let-option>{{ option | roleLabel }}</ng-template>
+      <ng-template #selectedItem let-option>{{ option | roleLabel }}</ng-template>
+    </p-select>
+  </div>
+  <div class="actions">
+    <p-button
+      [label]="'common.clear' | translate"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="clearFilters()"
+    />
+    <p-button [label]="'common.filter' | translate" icon="pi pi-filter" (onClick)="load()" />
+  </div>
+</section>
+
+<section class="content-card">
+  <p-table
+    [value]="users()"
+    [loading]="loading()"
+    [paginator]="true"
+    [alwaysShowPaginator]="false"
+    [rows]="20"
+    [totalRecords]="total()"
+    [lazy]="true"
+    (onLazyLoad)="load(($event.first ?? 0) / ($event.rows ?? 20))"
+    responsiveLayout="scroll"
+  >
+    <ng-template #header
+      ><tr>
+        <th>{{ 'common.name' | translate }}</th>
+        <th>{{ 'auth.email' | translate }}</th>
+        <th>{{ 'users.role' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th>
+        <th>{{ 'users.lastLogin' | translate }}</th>
+        <th>{{ 'common.actions' | translate }}</th>
+      </tr></ng-template
+    >
+    <ng-template #body let-user
+      ><tr>
+        <td>
+          <strong>{{ user.name }}</strong>
+        </td>
+        <td>{{ user.email }}</td>
+        <td>
+          <div class="role-list">
+            @for (userRole of user.roles; track userRole) {
+              <p-tag [value]="userRole | roleLabel" severity="info" />
+            }
+          </div>
+        </td>
+        <td>
+          <p-tag
+            [value]="(user.active ? 'common.active' : 'common.inactive') | translate"
+            [severity]="user.active ? 'success' : 'secondary'"
+          />
+        </td>
+        <td>{{ user.lastLoginAt | localizedDateTime }}</td>
+        <td>
+          <div class="row-actions">
+            <p-button
+              icon="pi pi-pencil"
+              [text]="true"
+              [pTooltip]="'common.edit' | translate"
+              [attr.aria-label]="'common.edit' | translate"
+              (onClick)="open(user)"
+            />
+          </div>
+        </td></tr
+    ></ng-template>
+    <ng-template #emptymessage
+      ><tr>
+        <td colspan="6">
+          <div class="empty">{{ 'users.empty' | translate }}</div>
+        </td>
+      </tr></ng-template
+    >
+  </p-table>
+</section>
+
+<p-dialog
+  [header]="(editing ? 'users.edit' : 'users.create') | translate"
+  [visible]="dialog()"
+  (visibleChange)="dialog.set($event)"
+  [modal]="true"
+  [style]="{ width: '36rem' }"
+>
+  <div class="form-grid">
+    <div class="field">
+      <label for="user-name">{{ 'common.name' | translate }}</label>
+      <input id="user-name" pInputText [(ngModel)]="name" />
+    </div>
+    <div class="field">
+      <label for="user-email">{{ 'auth.email' | translate }}</label>
+      <input id="user-email" pInputText type="email" [(ngModel)]="email" />
+    </div>
+    @if (!editing) {
+      <div class="field wide">
+        <label for="initial-password">{{ 'users.initialPassword' | translate }}</label>
+        <p-password
+          inputId="initial-password"
+          [(ngModel)]="password"
+          autocomplete="new-password"
+          [feedback]="false"
+          [toggleMask]="true"
+          [minlength]="8"
+          [maxlength]="128"
+        />
+        <p class="helper">{{ 'auth.passwordPolicy' | translate }}</p>
+      </div>
+    }
+    <div class="field wide">
+      <label for="user-roles">{{ 'users.role' | translate }}</label>
+      <p-multiselect inputId="user-roles" [(ngModel)]="roles" [options]="roleOptions">
+        <ng-template #item let-option>{{ option | roleLabel }}</ng-template>
+        <ng-template #selectedItems let-values>
+          @for (value of values; track value) {
+            {{ value | roleLabel }}
+          }
+        </ng-template>
+      </p-multiselect>
+    </div>
+    <label class="wide"
+      ><input type="checkbox" [(ngModel)]="active" /> {{ 'common.active' | translate }}</label
+    >
+  </div>
+  <div class="dialog-actions">
+    <p-button
+      [label]="'common.cancel' | translate"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="dialog.set(false)"
+    />
+    <p-button [label]="'common.save' | translate" [loading]="saving()" (onClick)="save()" />
   </div>
 </p-dialog>

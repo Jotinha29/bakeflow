@@ -1,18 +1,131 @@
-<section class="page-header"><h1>{{'account.title'|translate}}</h1>
-  <p>{{auth.user()?.name}} · {{auth.user()?.email}}</p><p>{{auth.user()?.roles?.join(', ')}}</p></section>
-<section><h2>{{'account.changePassword'|translate}}</h2><div class="form-grid">
-  <input type="password" autocomplete="current-password" [(ngModel)]="current"
-    [placeholder]="'account.currentPassword'|translate">
-  <input type="password" autocomplete="new-password" minlength="8" maxlength="128" [(ngModel)]="next"
-    [placeholder]="'account.newPassword'|translate">
-  <p-button [label]="'account.changePassword'|translate" [loading]="changing()" (onClick)="change()"
-    [disabled]="next.length<8||changing()"/></div></section>
-<section><h2>{{'account.sessions'|translate}}</h2>
-  @if(loading()){<p>{{'common.loading'|translate}}</p>}
-  @for(session of sessions();track session.id){<div class="session">
-    <span>{{session.userAgent||'—'}} · {{session.createdAt}} @if(session.current){({{'account.current'|translate}})}</span>
-    @if(!session.current){<p-button [label]="'account.revoke'|translate" [text]="true"
-      (onClick)="revoke(session.id)"/>}</div>}
-  <div class="actions"><p-button [label]="'account.logout'|translate" severity="secondary" (onClick)="logout()"/>
-    <p-button [label]="'account.logoutAll'|translate" severity="danger" (onClick)="logoutAll()"/></div>
-</section>
+<header class="page-header">
+  <div class="page-header-copy">
+    <span class="eyebrow">{{ 'account.kicker' | translate }}</span>
+    <h1>{{ 'account.title' | translate }}</h1>
+    <p>{{ 'account.subtitle' | translate }}</p>
+  </div>
+</header>
+
+<div class="account-grid">
+  <section class="account-card" aria-labelledby="profile-heading">
+    <h2 id="profile-heading">{{ 'account.profile' | translate }}</h2>
+    <dl class="profile-list">
+      <div>
+        <dt>{{ 'common.name' | translate }}</dt>
+        <dd>{{ auth.user()?.name }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'auth.email' | translate }}</dt>
+        <dd>{{ auth.user()?.email }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'users.role' | translate }}</dt>
+        <dd class="role-list">
+          @for (role of auth.user()?.roles; track role) {
+            <p-tag [value]="role | roleLabel" severity="info" />
+          }
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="account-card" aria-labelledby="security-heading">
+    <h2 id="security-heading">{{ 'account.security' | translate }}</h2>
+    <div class="form-grid security-form">
+      <div class="field wide">
+        <label for="current-password">{{ 'account.currentPassword' | translate }}</label>
+        <p-password
+          inputId="current-password"
+          [(ngModel)]="current"
+          autocomplete="current-password"
+          [feedback]="false"
+          [toggleMask]="true"
+        />
+      </div>
+      <div class="field">
+        <label for="new-password">{{ 'account.newPassword' | translate }}</label>
+        <p-password
+          inputId="new-password"
+          [(ngModel)]="next"
+          autocomplete="new-password"
+          [feedback]="false"
+          [toggleMask]="true"
+          [minlength]="8"
+          [maxlength]="128"
+        />
+      </div>
+      <div class="field">
+        <label for="confirm-password">{{ 'account.confirmPassword' | translate }}</label>
+        <p-password
+          inputId="confirm-password"
+          [(ngModel)]="confirmation"
+          autocomplete="new-password"
+          [feedback]="false"
+          [toggleMask]="true"
+          [minlength]="8"
+          [maxlength]="128"
+        />
+      </div>
+      <p class="helper wide">{{ 'auth.passwordPolicy' | translate }}</p>
+    </div>
+    <div class="dialog-actions">
+      <p-button
+        [label]="'account.changePassword' | translate"
+        [loading]="changing()"
+        (onClick)="change()"
+        [disabled]="next.length < 8 || next !== confirmation || changing()"
+      />
+    </div>
+  </section>
+
+  <section class="account-card sessions-card" aria-labelledby="sessions-heading">
+    <div class="section-header">
+      <h2 id="sessions-heading">{{ 'account.activeSessions' | translate }}</h2>
+      <p-button
+        [label]="'account.logoutAll' | translate"
+        severity="danger"
+        [outlined]="true"
+        (onClick)="logoutAll()"
+      />
+    </div>
+    @if (loading()) {
+      <p class="muted" role="status">{{ 'common.loading' | translate }}</p>
+    }
+    <div class="session-list">
+      @for (session of sessions(); track session.id) {
+        <article class="session">
+          <div class="session-copy">
+            <div class="actions">
+              <strong>{{ sessionName(session.userAgent) }}</strong>
+              @if (session.current) {
+                <p-tag [value]="'account.currentSession' | translate" severity="success" />
+              }
+            </div>
+            <span class="muted"
+              >{{
+                (session.lastUsedAt ? 'account.lastActivity' : 'account.createdAt') | translate
+              }}: {{ session.lastUsedAt || session.createdAt | localizedDateTime }}</span
+            >
+          </div>
+          @if (!session.current) {
+            <p-button
+              [label]="'account.revoke' | translate"
+              severity="danger"
+              [outlined]="true"
+              size="small"
+              (onClick)="revoke(session.id)"
+            />
+          }
+        </article>
+      }
+    </div>
+    <div class="dialog-actions">
+      <p-button
+        [label]="'account.logout' | translate"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="logout()"
+      />
+    </div>
+  </section>
+</div>
