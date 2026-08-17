@@ -5,6 +5,8 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { IntegrationStatusCardComponent } from '../../features/integrations/components/integration-status-card/integration-status-card.component';
 import { IntegrationService } from '../../features/integrations/integration.service';
 import {
   ExternalCompany,
@@ -14,7 +16,7 @@ import {
 @Component({
   standalone: true,
   selector: 'app-integrations-page',
-  imports: [FormsModule, ButtonModule, CardModule, TagModule, TranslatePipe],
+  imports: [FormsModule, ButtonModule, CardModule, TagModule, TranslatePipe, PageHeaderComponent, IntegrationStatusCardComponent],
   templateUrl: './integrations-page.component.html',
   styleUrl: './integrations-page.component.scss',
 })

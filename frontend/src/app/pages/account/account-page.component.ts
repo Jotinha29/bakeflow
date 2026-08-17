@@ -12,6 +12,8 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { LocalizedDateTimePipe } from '../../core/i18n/localized-date-time.pipe';
 import { RoleLabelPipe } from '../../core/i18n/role-label.pipe';
 import { presentUserAgent } from '../../core/auth/session-presentation';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { LoadingStateComponent } from '../../shared/ui/loading-state/loading-state.component';
 
 @Component({
   standalone: true,
@@ -23,6 +25,8 @@ import { presentUserAgent } from '../../core/auth/session-presentation';
     TranslatePipe,
     LocalizedDateTimePipe,
     RoleLabelPipe,
+    PageHeaderComponent,
+    LoadingStateComponent,
   ],
   templateUrl: './account-page.component.html',
 })

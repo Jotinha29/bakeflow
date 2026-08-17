@@ -1,11 +1,6 @@
-<header class="page-header">
-  <div>
-    <span class="kicker">{{ 'inventory.physicalStructure' | translate }}</span>
-    <h1>{{ 'locations.title' | translate }}</h1>
-    <p>{{ 'locations.subtitle' | translate }}</p>
-  </div>
-  <p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />
-</header>
+<app-page-header [eyebrow]="'inventory.physicalStructure'|translate" [title]="'locations.title'|translate" [description]="'locations.subtitle'|translate">
+  @if(auth.can('ITEM_WRITE')){<p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />}
+</app-page-header>
 <form class="filter-panel location-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
     <label for="location-search">{{ 'common.name' | translate }}</label
@@ -50,7 +45,7 @@
   @if (!loading() && nodes().length === 0) {
     <div class="empty">
       <p>{{ 'locations.empty' | translate }}</p>
-      <p-button [label]="'locations.create' | translate" [text]="true" (onClick)="open()" />
+      @if(auth.can('ITEM_WRITE')){<p-button [label]="'locations.create' | translate" [text]="true" (onClick)="open()" />}
     </div>
   } @else {
     <p-tree [value]="nodes()" [loading]="loading()"
@@ -62,7 +57,7 @@
             [value]="(node.data.active ? 'common.active' : 'common.inactive') | translate"
             [severity]="node.data.active ? 'success' : 'secondary'"
           />
-          <div class="node-actions">
+          @if(auth.can('ITEM_WRITE')){<div class="node-actions">
             <p-button
               icon="pi pi-pencil"
               [rounded]="true"
@@ -92,7 +87,7 @@
               "
               (onClick)="toggle(node.data)"
             />
-          </div></div></ng-template
+          </div>}</div></ng-template
     ></p-tree>
   }
 </section>

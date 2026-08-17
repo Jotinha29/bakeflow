@@ -8,22 +8,31 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TableModule, TablePageEvent } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LocalizedDatePipe } from '../../../core/i18n/localized-date.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { InventoryService } from '../../../features/inventory/inventory.service';
 import { Batch, Item, Location, StockBalance, StockOperation } from '../../../features/inventory/inventory.models';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { FilterPanelComponent } from '../../../shared/ui/filter-panel/filter-panel.component';
+import { TableContainerComponent } from '../../../shared/ui/table-container/table-container.component';
+import { TableActionsComponent } from '../../../shared/ui/table-actions/table-actions.component';
+import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { StockQuantityDisplayComponent } from '../../../features/inventory/components/stock-quantity-display/stock-quantity-display.component';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 type Operation = 'entries' | 'exits' | 'transfers' | 'losses' | 'adjustments';
 @Component({
   selector: 'app-stock-page',
-  imports: [ReactiveFormsModule, ButtonModule, DialogModule, InputNumberModule, InputTextModule, SelectModule, TableModule, TranslatePipe, LocalizedDatePipe],
+  imports: [ReactiveFormsModule, ButtonModule, DialogModule, InputNumberModule, InputTextModule, SelectModule, TableModule, TooltipModule, TranslatePipe, LocalizedDatePipe, PageHeaderComponent, FilterPanelComponent, TableContainerComponent, TableActionsComponent, EmptyStateComponent, StockQuantityDisplayComponent],
   templateUrl: './stock-page.component.html',
   styleUrl: '../inventory-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StockPageComponent {
   private fb = inject(FormBuilder); private api = inject(InventoryService); private messages = inject(MessageService);
+  protected i18n = inject(I18nService);
   protected auth = inject(AuthService); protected balances = signal<StockBalance[]>([]); protected items = signal<Item[]>([]);
   protected batches = signal<Batch[]>([]); protected locations = signal<Location[]>([]); protected total = signal(0);
   protected loading = signal(false); protected submitting = signal(false); protected dialog = signal(false); protected operation = signal<Operation>('entries');
@@ -38,6 +47,7 @@ export class StockPageComponent {
   protected open(operation: Operation, balance?: StockBalance) { this.operation.set(operation); this.form.reset({itemId:balance?.itemId??'',batchId:balance?.batchId??'',locationId:balance?.locationId??'',sourceLocationId:balance?.locationId??'',destinationLocationId:'',quantity:null,physicalQuantity:balance?.quantity??null,reason:this.defaultReason(operation),notes:'',justification:''}); this.dialog.set(true); }
   protected save() { if (this.submitting()) return; const value=this.form.getRawValue(); const input: StockOperation={...value,itemId:value.itemId!,batchId:value.batchId!,locationId:value.locationId||undefined,sourceLocationId:value.sourceLocationId||undefined,destinationLocationId:value.destinationLocationId||undefined,quantity:value.quantity??undefined,physicalQuantity:value.physicalQuantity??undefined,reason:value.reason||undefined,notes:value.notes||undefined,justification:value.justification||undefined}; this.submitting.set(true); this.api.stockOperation(this.operation(),input).pipe(finalize(()=>this.submitting.set(false))).subscribe({next:()=>{this.dialog.set(false);this.messages.add({severity:'success',summary:'OK',detail:'Operação de estoque registrada.'});this.load();},error:()=>this.error()}); }
   protected can(permission:string){return this.auth.can(permission);} protected needsLocation(){return this.operation()!=='transfers';}
+  protected operationLabel(){return this.i18n.translate('stock.operation.'+this.operation());}
   private defaultReason(op:Operation){return op==='entries'?'RECEIPT':op==='exits'?'INTERNAL_USE':op==='losses'?'DAMAGED':'';}
   private flatten(values:Location[]):Location[]{return values.flatMap(v=>[v,...this.flatten(v.children??[])]);}
   private error(){this.messages.add({severity:'error',summary:'Erro',detail:'Não foi possível concluir a operação.'});}

@@ -15,6 +15,8 @@ import { Batch, BatchInput, Item } from '../../../features/inventory/inventory.m
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { LocalizedDatePipe } from '../../../core/i18n/localized-date.pipe';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-batches-page',
   imports: [
@@ -29,12 +31,14 @@ import { LocalizedDatePipe } from '../../../core/i18n/localized-date.pipe';
     TooltipModule,
     TranslatePipe,
     LocalizedDatePipe,
+    PageHeaderComponent,
   ],
   templateUrl: './batches-page.component.html',
   styleUrl: '../inventory-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BatchesPageComponent {
+  protected auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private api = inject(InventoryService);
   private messages = inject(MessageService);

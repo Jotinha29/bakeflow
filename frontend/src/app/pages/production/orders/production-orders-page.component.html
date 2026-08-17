@@ -1,13 +1,8 @@
-<header class="page-header">
-  <div>
-    <span class="kicker">{{ 'production.kicker' | translate }}</span>
-    <h1>{{ 'orders.title' | translate }}</h1>
-    <p>{{ 'orders.subtitle' | translate }}</p>
-  </div>
+<app-page-header [eyebrow]="'production.kicker'|translate" [title]="'orders.title'|translate" [description]="'orders.subtitle'|translate">
   @if (auth.can('PRODUCTION_CREATE')) {
     <p-button [label]="'orders.create' | translate" icon="pi pi-plus" (onClick)="openCreate()" />
   }
-</header>
+</app-page-header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="load()">
   <div class="field">
     <label>{{ 'common.code' | translate }}</label

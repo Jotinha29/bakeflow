@@ -1,10 +1,4 @@
-<header class="page-header">
-  <div class="page-header-copy">
-    <span class="eyebrow">{{ 'account.kicker' | translate }}</span>
-    <h1>{{ 'account.title' | translate }}</h1>
-    <p>{{ 'account.subtitle' | translate }}</p>
-  </div>
-</header>
+<app-page-header [eyebrow]="'account.kicker'|translate" [title]="'account.title'|translate" [description]="'account.subtitle'|translate"/>
 
 <div class="account-grid">
   <section class="account-card" aria-labelledby="profile-heading">
@@ -89,7 +83,7 @@
       />
     </div>
     @if (loading()) {
-      <p class="muted" role="status">{{ 'common.loading' | translate }}</p>
+      <app-loading-state [label]="'common.loading'|translate"/>
     }
     <div class="session-list">
       @for (session of sessions(); track session.id) {

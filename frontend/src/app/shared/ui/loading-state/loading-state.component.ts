@@ -1,0 +1,3 @@
+import { ChangeDetectionStrategy, Component, input } from '@angular/core'; import { ProgressSpinnerModule } from 'primeng/progressspinner';
+@Component({selector:'app-loading-state',imports:[ProgressSpinnerModule],template:`<div class="bf-loading" role="status" aria-live="polite"><p-progress-spinner [style]="{width:'2rem',height:'2rem'}" strokeWidth="5"/><span>{{label()}}</span></div>`,styles:[`.bf-loading{align-items:center;color:var(--bf-text-muted);display:flex;gap:var(--space-3);justify-content:center;padding:var(--space-8)}`],changeDetection:ChangeDetectionStrategy.OnPush})
+export class LoadingStateComponent {readonly label=input('Carregando…');}

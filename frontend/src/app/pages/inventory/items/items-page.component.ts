@@ -23,6 +23,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { LocalizedNumberPipe } from '../../../core/i18n/localized-number.pipe';
 import { AuthService } from '../../../core/auth/auth.service';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 
 @Component({
   selector: 'app-items-page',
@@ -38,6 +39,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     TooltipModule,
     TranslatePipe,
     LocalizedNumberPipe,
+    PageHeaderComponent,
   ],
   templateUrl: './items-page.component.html',
   styleUrl: '../inventory-page.scss',

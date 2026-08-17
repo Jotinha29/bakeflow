@@ -1,35 +1,8 @@
-<section class="page-header">
-  <span class="eyebrow">{{ 'integrations.kicker' | translate }}</span>
-  <h1>{{ 'integrations.title' | translate }}</h1>
-  <p>{{ 'integrations.subtitle' | translate }}</p>
-</section>
+<app-page-header [eyebrow]="'integrations.kicker'|translate" [title]="'integrations.title'|translate" [description]="'integrations.subtitle'|translate"/>
 <div class="status-grid">
-  <p-card header="Open Food Facts"
-    ><p>{{ 'integrations.productUse' | translate }}</p>
-    <p-tag
-      [value]="
-        (status()?.openFoodFacts?.configured ? 'integrations.configured' : 'dashboard.unavailable')
-          | translate
-      "
-      [severity]="status()?.openFoodFacts?.configured ? 'success' : 'danger'"
-    /><small>{{ 'integrations.cacheRedis' | translate }}</small></p-card
-  >
-  <p-card header="BrasilAPI"
-    ><p>{{ 'integrations.companyUse' | translate }}</p>
-    <p-tag
-      [value]="
-        (status()?.brasilApi?.configured ? 'integrations.configured' : 'dashboard.unavailable')
-          | translate
-      "
-      [severity]="status()?.brasilApi?.configured ? 'success' : 'danger'"
-    /><small>{{ 'integrations.cacheRedis' | translate }}</small></p-card
-  >
-  <p-card header="Redis"
-    ><p>{{ 'integrations.redisUse' | translate }}</p>
-    <p-tag
-      [value]="(status()?.redisAvailable ? 'dashboard.up' : 'dashboard.down') | translate"
-      [severity]="status()?.redisAvailable ? 'success' : 'danger'"
-  /></p-card>
+  <app-integration-status-card name="Open Food Facts" [description]="'integrations.productUse'|translate" [statusLabel]="(status()?.openFoodFacts?.configured?'integrations.configured':'dashboard.unavailable')|translate" [tone]="status()?.openFoodFacts?.configured?'success':'danger'" [details]="'integrations.cacheRedis'|translate"/>
+  <app-integration-status-card name="BrasilAPI" [description]="'integrations.companyUse'|translate" [statusLabel]="(status()?.brasilApi?.configured?'integrations.configured':'dashboard.unavailable')|translate" [tone]="status()?.brasilApi?.configured?'success':'danger'" [details]="'integrations.cacheRedis'|translate"/>
+  <app-integration-status-card name="Redis" [description]="'integrations.redisUse'|translate" [statusLabel]="(status()?.redisAvailable?'dashboard.up':'dashboard.down')|translate" [tone]="status()?.redisAvailable?'success':'danger'"/>
 </div>
 <div class="demo-grid">
   <p-card [header]="'integrations.product' | translate"

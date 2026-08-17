@@ -151,6 +151,8 @@ label {
 .muted {
   color: var(--bf-text-muted);
 }
+.sr-only{height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;clip:rect(0,0,0,0);white-space:nowrap}
+.item-identity{display:grid;gap:var(--space-1)}.item-identity small{color:var(--bf-text-muted);font-size:.76rem;letter-spacing:.035em}.movement-route{align-items:center;display:flex;gap:var(--space-2);white-space:nowrap}.movement-route i{color:#9a5728;font-size:.75rem}.detail-list{display:grid;gap:var(--space-2);grid-template-columns:max-content 1fr}.detail-list dt{color:var(--bf-text-muted);font-weight:650}.detail-list dd{margin:0}
 
 .actions,
 .dialog-actions,

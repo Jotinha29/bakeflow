@@ -1,13 +1,8 @@
-<header class="page-header">
-  <div>
-    <span class="kicker">{{ 'inventory.catalog' | translate }}</span>
-    <h1>{{ 'items.title' | translate }}</h1>
-    <p>{{ 'items.subtitle' | translate }}</p>
-  </div>
+<app-page-header [eyebrow]="'inventory.catalog'|translate" [title]="'items.title'|translate" [description]="'items.subtitle'|translate">
   @if (auth.can('ITEM_WRITE')) {
     <p-button [label]="'items.create' | translate" icon="pi pi-plus" (onClick)="open()" />
   }
-</header>
+</app-page-header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
     <label for="item-search">{{ 'common.name' | translate }}</label

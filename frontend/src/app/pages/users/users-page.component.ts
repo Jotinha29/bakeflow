@@ -17,6 +17,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { LocalizedDateTimePipe } from '../../core/i18n/localized-date-time.pipe';
 import { RoleLabelPipe } from '../../core/i18n/role-label.pipe';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 @Component({
   standalone: true,
@@ -34,6 +35,7 @@ import { RoleLabelPipe } from '../../core/i18n/role-label.pipe';
     TranslatePipe,
     LocalizedDateTimePipe,
     RoleLabelPipe,
+    PageHeaderComponent,
   ],
   templateUrl: './users-page.component.html',
 })

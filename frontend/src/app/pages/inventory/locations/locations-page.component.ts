@@ -17,6 +17,8 @@ import {
 } from '../../../features/inventory/inventory.models';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { AuthService } from '../../../core/auth/auth.service';
 @Component({
   selector: 'app-locations-page',
   imports: [
@@ -29,12 +31,14 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
     TagModule,
     TooltipModule,
     TranslatePipe,
+    PageHeaderComponent,
   ],
   templateUrl: './locations-page.component.html',
   styleUrls: ['../inventory-page.scss', './locations-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocationsPageComponent {
+  protected auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private api = inject(InventoryService);
   private messages = inject(MessageService);

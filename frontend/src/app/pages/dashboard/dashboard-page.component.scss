@@ -1,6 +1,6 @@
 .hero {
   max-width: 850px;
-  padding: 4vh 0 8vh;
+  padding: 1rem 0 2.5rem;
 }
 .kicker {
   color: #ad6733;
@@ -12,7 +12,7 @@
 h1 {
   color: #17201d;
   font-family: Georgia, serif;
-  font-size: clamp(2.7rem, 6vw, 5.4rem);
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 0.98;
@@ -41,6 +41,7 @@ h2 {
   gap: 1rem;
   grid-template-columns: repeat(3, 1fr);
 }
+.operational-metrics{display:grid;gap:1rem;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:1.25rem}.operational-metrics strong{font-size:2rem}.operational-metrics span{color:var(--bf-text-muted)}
 .production-panel {
   margin-top: 1.25rem;
 }
@@ -67,7 +68,7 @@ h2 {
   justify-content: space-between;
 }
 @media (max-width: 720px) {
-  .status-grid {
+  .status-grid,.operational-metrics {
     grid-template-columns: 1fr;
   }
 }

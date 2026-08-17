@@ -143,6 +143,10 @@ Angular → JWT Bearer → Spring Security → Application → PostgreSQL
 
 A suíte dedicada mantém o Spring Security habilitado e cobre fronteiras 401/403, roles representativas, JWT inválido ou expirado, cookies, logout, sessões, IDOR, alteração de senha, rate limit e persistência da revogação após reuse. No frontend, os testes cobrem o interceptor restrito à API interna, refresh single-flight, falha de refresh, guards e sanitização de filtros.
 
+### Design System e composição do frontend
+
+O frontend preserva os tokens visuais do BakeFlow e usa componentes pequenos em `shared/ui` para cabeçalhos, filtros, containers de tabela, ações, estados e cards. Regras visuais de estoque e integrações permanecem em componentes especializados de cada feature, compostos sobre essa base. Os layouts reorganizam ações e filtros em telas estreitas e mantêm tabelas com rolagem horizontal, sem recorrer a páginas CRUD ou tabelas universais configuradas por JSON.
+
 ### Aviso de licença PrimeUI
 
 O PrimeNG 22 inclui transitivamente `@primeuix/styled` e `@primeui/license-manager`. Em ambientes sem uma chave PrimeUI válida, a biblioteca emite um aviso no console. O aviso não foi ocultado nem contornado: a correção legítima exige configurar uma licença compatível com os termos do fornecedor ou substituir a dependência em uma evolução futura.

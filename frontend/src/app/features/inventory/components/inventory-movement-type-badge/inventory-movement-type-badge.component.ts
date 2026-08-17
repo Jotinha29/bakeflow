@@ -1,0 +1,4 @@
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { I18nService } from '../../../../core/i18n/i18n.service'; import { StatusBadgeComponent, BadgeTone } from '../../../../shared/ui/status-badge/status-badge.component'; import { StockMovementType } from '../../inventory.models';
+@Component({selector:'app-inventory-movement-type-badge',imports:[StatusBadgeComponent],template:`<app-status-badge [label]="label()" [tone]="tone()"/>`,changeDetection:ChangeDetectionStrategy.OnPush})
+export class InventoryMovementTypeBadgeComponent {readonly type=input.required<StockMovementType>();private i18n=inject(I18nService);readonly label=computed(()=>this.i18n.translate('enum.stockMovement.'+this.type()));readonly tone=computed<BadgeTone>(()=>({ENTRY:'success',PRODUCTION_OUTPUT:'success',EXIT:'info',PRODUCTION_CONSUMPTION:'info',TRANSFER:'secondary',LOSS:'danger',ADJUSTMENT:'warn'}[this.type()] as BadgeTone));}

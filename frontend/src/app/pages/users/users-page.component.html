@@ -1,11 +1,6 @@
-<header class="page-header">
-  <div class="page-header-copy">
-    <span class="eyebrow">{{ 'users.kicker' | translate }}</span>
-    <h1>{{ 'users.title' | translate }}</h1>
-    <p>{{ 'users.subtitle' | translate }}</p>
-  </div>
-  <p-button [label]="'users.create' | translate" icon="pi pi-plus" (onClick)="open()" />
-</header>
+<app-page-header [eyebrow]="'users.kicker'|translate" [title]="'users.title'|translate" [description]="'users.subtitle'|translate">
+  @if(auth.can('USER_WRITE')){<p-button [label]="'users.create' | translate" icon="pi pi-plus" (onClick)="open()" />}
+</app-page-header>
 
 <section class="filter-panel" [attr.aria-label]="'users.filters' | translate">
   <div class="field">

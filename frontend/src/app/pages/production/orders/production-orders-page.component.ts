@@ -15,6 +15,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { LocalizedDatePipe } from '../../../core/i18n/localized-date.pipe';
 import { LocalizedNumberPipe } from '../../../core/i18n/localized-number.pipe';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { InventoryService } from '../../../features/inventory/inventory.service';
 import { Location } from '../../../features/inventory/inventory.models';
 import {
@@ -39,6 +40,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     TextareaModule,
     TooltipModule,
     TranslatePipe,
+    PageHeaderComponent,
     LocalizedDatePipe,
     LocalizedNumberPipe,
   ],

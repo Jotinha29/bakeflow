@@ -1,11 +1,6 @@
-<header class="page-header">
-  <div>
-    <span class="kicker">{{ 'inventory.traceability' | translate }}</span>
-    <h1>{{ 'batches.title' | translate }}</h1>
-    <p>{{ 'batches.subtitle' | translate }}</p>
-  </div>
-  <p-button [label]="'batches.create' | translate" icon="pi pi-plus" (onClick)="open()" />
-</header>
+<app-page-header [eyebrow]="'inventory.traceability'|translate" [title]="'batches.title'|translate" [description]="'batches.subtitle'|translate">
+  @if(auth.can('ITEM_WRITE')){<p-button [label]="'batches.create' | translate" icon="pi pi-plus" (onClick)="open()" />}
+</app-page-header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="applyFilters()">
   <div class="field">
     <label for="batch-item">{{ 'batches.item' | translate }}</label

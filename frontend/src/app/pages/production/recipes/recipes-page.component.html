@@ -1,13 +1,8 @@
-<header class="page-header">
-  <div>
-    <span class="kicker">{{ 'production.kicker' | translate }}</span>
-    <h1>{{ 'recipes.title' | translate }}</h1>
-    <p>{{ 'recipes.subtitle' | translate }}</p>
-  </div>
+<app-page-header [eyebrow]="'production.kicker'|translate" [title]="'recipes.title'|translate" [description]="'recipes.subtitle'|translate">
   @if (auth.can('RECIPE_WRITE')) {
     <p-button [label]="'recipes.create' | translate" icon="pi pi-plus" (onClick)="open()" />
   }
-</header>
+</app-page-header>
 <form class="filter-panel" [formGroup]="filters" (ngSubmit)="load()">
   <div class="field">
     <label for="recipe-search">{{ 'common.name' | translate }}</label

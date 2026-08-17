@@ -4,8 +4,15 @@
   <p>{{ 'dashboard.subtitle' | translate }}</p>
 </section>
 
+@if (inventory$ | async; as inventory) {
+  <section class="operational-metrics" aria-label="Indicadores operacionais">
+    <p-card><span>{{'dashboard.belowMinimum'|translate}}</span><strong>{{inventory.belowMinimum|localizedNumber}}</strong></p-card>
+    <p-card><span>{{'dashboard.expiringBatches'|translate}}</span><strong>{{inventory.expiringBatches|localizedNumber}}</strong></p-card>
+  </section>
+}
+
 @if (status$ | async; as system) {
-  <section class="status-panel" aria-labelledby="status-title">
+  <app-section-card aria-labelledby="status-title">
     <div>
       <span class="kicker">{{ 'dashboard.infrastructure' | translate }}</span>
       <h2 id="status-title">
@@ -37,10 +44,10 @@
         />
       </p-card>
     </div>
-  </section>
+  </app-section-card>
 }
 @if (production$ | async; as production) {
-  <section class="status-panel production-panel" aria-labelledby="production-title">
+  <app-section-card class="production-panel" aria-labelledby="production-title">
     <div>
       <span class="kicker">{{ 'dashboard.production' | translate }}</span>
       <h2 id="production-title">{{ 'dashboard.productionOverview' | translate }}</h2>
@@ -71,5 +78,5 @@
         <p>{{ 'dashboard.noRecentProduction' | translate }}</p>
       }
     </div>
-  </section>
+  </app-section-card>
 }
