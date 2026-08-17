@@ -9,6 +9,9 @@ import {
   LocationInput,
   PageResult,
   ProductInformation,
+  StockBalance,
+  StockMovement,
+  StockOperation,
 } from './inventory.models';
 
 @Injectable({ providedIn: 'root' })
@@ -68,6 +71,16 @@ export class InventoryService {
       `${this.base}/locations/${id}/${active ? 'activate' : 'deactivate'}`,
       {},
     );
+  }
+  stockBalances(filters: Record<string, string | number | boolean | null | undefined>) {
+    return this.http.get<PageResult<StockBalance>>(`${this.base}/stock/balances`, { params: this.params(filters) });
+  }
+  stockMovements(filters: Record<string, string | number | boolean | null | undefined>) {
+    return this.http.get<PageResult<StockMovement>>(`${this.base}/stock/movements`, { params: this.params(filters) });
+  }
+  stockMovement(id: string) { return this.http.get<StockMovement>(`${this.base}/stock/movements/${id}`); }
+  stockOperation(kind: 'entries' | 'exits' | 'transfers' | 'losses' | 'adjustments', input: StockOperation) {
+    return this.http.post<StockMovement>(`${this.base}/stock/${kind}`, input);
   }
   private params(values: Record<string, string | number | boolean | null | undefined>) {
     let params = new HttpParams();

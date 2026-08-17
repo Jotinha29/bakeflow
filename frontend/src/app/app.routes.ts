@@ -15,6 +15,18 @@ export const routes: Routes = [
     title: 'BakeFlow',
   },
   {
+    path: 'inventory/stock',
+    canActivate: [authGuard, permissionGuard('STOCK_READ')],
+    loadComponent: () => import('./pages/inventory/stock/stock-page.component').then((m) => m.StockPageComponent),
+    title: 'Stock | BakeFlow',
+  },
+  {
+    path: 'inventory/movements',
+    canActivate: [authGuard, permissionGuard('MOVEMENT_READ')],
+    loadComponent: () => import('./pages/inventory/movements/movements-page.component').then((m) => m.MovementsPageComponent),
+    title: 'Stock Movements | BakeFlow',
+  },
+  {
     path: 'inventory/items',
     canActivate: [authGuard],
     loadComponent: () =>

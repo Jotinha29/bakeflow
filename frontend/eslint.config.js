@@ -42,4 +42,11 @@ module.exports = defineConfig([
     files: ['src/app/pages/production/**/*.html'],
     rules: { '@angular-eslint/template/label-has-associated-control': 'off' },
   },
+  {
+    files: [
+      'src/app/pages/inventory/stock/**/*.html',
+      'src/app/pages/inventory/movements/**/*.html',
+    ],
+    rules: { '@angular-eslint/template/label-has-associated-control': 'off' },
+  },
 ]);

@@ -3,6 +3,7 @@ package com.bakeflow.inventory.infrastructure.persistence;
 import com.bakeflow.inventory.application.InventoryStockOperations;
 import com.bakeflow.audit.AuditService;
 import com.bakeflow.inventory.domain.DomainException;
+import com.bakeflow.identity.SecuritySupport;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,7 +79,14 @@ public class JdbcInventoryStockOperations implements InventoryStockOperations {
             rs.getObject(5, UUID.class), rs.getString(6), rs.getObject(7, LocalDate.class), rs.getBigDecimal(8));
     }
     private void movement(Allocation a, String type, String reference) {
-        jdbc.update("INSERT INTO stock_movements(id,item_id,batch_id,location_id,type,quantity,reference,created_at) VALUES(?,?,?,?,?,?,?,?)",
-            UUID.randomUUID(), a.itemId(), a.batchId(), a.locationId(), type, a.quantity(), reference, Timestamp.from(Instant.now()));
+        UUID source = "PRODUCTION_CONSUMPTION".equals(type) ? a.locationId() : null;
+        UUID destination = "PRODUCTION_OUTPUT".equals(type) ? a.locationId() : null;
+        jdbc.update("""
+                INSERT INTO stock_movements(id,item_id,batch_id,location_id,type,quantity,reference,
+                  source_location_id,destination_location_id,actor_user_id,reason,created_at)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+                """, UUID.randomUUID(), a.itemId(), a.batchId(), a.locationId(), type, a.quantity(),
+                reference, source, destination, SecuritySupport.currentUserId(), "PRODUCTION",
+                Timestamp.from(Instant.now()));
     }
 }

@@ -2,7 +2,7 @@
 
 Plataforma de catálogo de estoque e gestão de produção para padarias e pequenos fabricantes de alimentos.
 
-O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece catálogo, lotes, locais, saldo usado pela produção, rastreabilidade dos movimentos gerados pela produção, receitas e ordens. Entradas, saídas, transferências, perdas e histórico completo de estoque ainda não possuem API ou tela próprias.
+O BakeFlow é uma base open source para operações confiáveis. A versão atual oferece catálogo, lotes, locais, consulta de saldos, entradas, saídas, transferências, perdas, ajustes por inventário, histórico completo e rastreável de estoque, receitas e ordens de produção.
 
 ## Tecnologias
 
@@ -153,7 +153,7 @@ O PrimeNG 22 inclui transitivamente `@primeuix/styled` e `@primeui/license-manag
 - [x] Controle de lotes
 - [x] Locais de estoque
 - [x] Saldo e movimentos transacionais usados pela produção
-- [ ] Movimentações manuais e consulta completa de estoque
+- [x] Movimentações manuais e consulta completa de estoque
 - [x] Integração com Open Food Facts
 - [x] Internacionalização pt-BR e en
 - [x] Receitas

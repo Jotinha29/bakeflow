@@ -16,6 +16,11 @@ export interface PageResult<T> {
   totalElements: number;
   totalPages: number;
 }
+
+export type StockMovementType = 'ENTRY' | 'EXIT' | 'TRANSFER' | 'LOSS' | 'ADJUSTMENT' | 'PRODUCTION_CONSUMPTION' | 'PRODUCTION_OUTPUT';
+export interface StockBalance { id: string; itemId: string; itemName: string; sku: string; batchId: string; batchCode: string; expirationDate?: string; expirationStatus: string; locationId: string; locationName: string; quantity: number; unit: UnitOfMeasure; updatedAt: string; }
+export interface StockMovement { id: string; type: StockMovementType; itemId: string; itemName: string; sku: string; batchId: string; batchCode: string; sourceLocationId?: string; sourceLocationName?: string; destinationLocationId?: string; destinationLocationName?: string; quantity: number; unit: UnitOfMeasure; actorUserId?: string; actorName?: string; reason?: string; notes?: string; reference?: string; previousQuantity?: number; resultingQuantity?: number; createdAt: string; }
+export interface StockOperation { itemId: string; batchId: string; locationId?: string; sourceLocationId?: string; destinationLocationId?: string; quantity?: number; physicalQuantity?: number; reason?: string; notes?: string; justification?: string; }
 export interface Item {
   id: string;
   name: string;

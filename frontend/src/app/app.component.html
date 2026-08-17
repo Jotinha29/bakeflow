@@ -13,6 +13,8 @@
         ><a routerLink="/inventory/locations" routerLinkActive="active"
           ><i class="pi pi-sitemap"></i>{{ 'nav.locations' | translate }}</a
         >
+        @if (auth.can('STOCK_READ')) {<a routerLink="/inventory/stock" routerLinkActive="active"><i class="pi pi-warehouse"></i>{{ 'nav.stock' | translate }}</a>}
+        @if (auth.can('MOVEMENT_READ')) {<a routerLink="/inventory/movements" routerLinkActive="active"><i class="pi pi-history"></i>{{ 'nav.movements' | translate }}</a>}
       </nav>
       <nav class="production-nav">
         <span class="nav-section">{{ 'nav.production' | translate }}</span
