@@ -5,78 +5,82 @@
 </section>
 
 @if (inventory$ | async; as inventory) {
-  <section class="operational-metrics" aria-label="Indicadores operacionais">
-    <p-card><span>{{'dashboard.belowMinimum'|translate}}</span><strong>{{inventory.belowMinimum|localizedNumber}}</strong></p-card>
-    <p-card><span>{{'dashboard.expiringBatches'|translate}}</span><strong>{{inventory.expiringBatches|localizedNumber}}</strong></p-card>
+  <section class="inventory-overview" aria-labelledby="inventory-title">
+    <div class="section-heading">
+      <span class="kicker">{{ 'nav.inventory' | translate }}</span>
+      <h2 id="inventory-title">{{ 'dashboard.inventoryOverview' | translate }}</h2>
+    </div>
+    <div class="inventory-metrics">
+      <app-dashboard-metric-card
+        [label]="'dashboard.belowMinimum' | translate"
+        [value]="inventory.belowMinimum"
+        icon="pi-arrow-down"
+        [tone]="inventory.belowMinimum > 0 ? 'danger' : 'success'"
+      />
+      <app-dashboard-metric-card
+        [label]="'dashboard.expiringBatches' | translate"
+        [value]="inventory.expiringBatches"
+        icon="pi-clock"
+        [tone]="inventory.expiringBatches > 0 ? 'warning' : 'success'"
+      />
+    </div>
   </section>
 }
 
-@if (status$ | async; as system) {
-  <app-section-card aria-labelledby="status-title">
-    <div>
-      <span class="kicker">{{ 'dashboard.infrastructure' | translate }}</span>
-      <h2 id="status-title">
-        {{
-          (system.status === 'UP' ? 'dashboard.operational' : 'dashboard.unavailable') | translate
-        }}
-      </h2>
-    </div>
-    <div class="status-grid">
-      <p-card>
-        <span>Backend</span>
-        <p-tag
-          [value]="(system.status === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate"
-          [severity]="system.status === 'UP' ? 'success' : 'danger'"
-        />
-      </p-card>
-      <p-card>
-        <span>PostgreSQL</span>
-        <p-tag
-          [value]="(system.postgres === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate"
-          [severity]="system.postgres === 'UP' ? 'success' : 'danger'"
-        />
-      </p-card>
-      <p-card>
-        <span>Redis</span>
-        <p-tag
-          [value]="(system.redis === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate"
-          [severity]="system.redis === 'UP' ? 'success' : 'danger'"
-        />
-      </p-card>
-    </div>
-  </app-section-card>
-}
 @if (production$ | async; as production) {
   <app-section-card class="production-panel" aria-labelledby="production-title">
-    <div>
+    <div class="section-heading">
       <span class="kicker">{{ 'dashboard.production' | translate }}</span>
       <h2 id="production-title">{{ 'dashboard.productionOverview' | translate }}</h2>
     </div>
-    <div class="status-grid">
-      <p-card
-        ><span>{{ 'dashboard.plannedOrders' | translate }}</span
-        ><strong>{{ production.planned | localizedNumber }}</strong></p-card
-      ><p-card
-        ><span>{{ 'dashboard.inProgress' | translate }}</span
-        ><strong>{{ production.inProgress | localizedNumber }}</strong></p-card
-      ><p-card
-        ><span>{{ 'dashboard.completedToday' | translate }}</span
-        ><strong>{{ production.completedToday | localizedNumber }}</strong></p-card
-      >
+    <div class="production-metrics">
+      <app-dashboard-metric-card [label]="'dashboard.plannedOrders' | translate" [value]="production.planned" icon="pi-calendar" />
+      <app-dashboard-metric-card [label]="'dashboard.inProgress' | translate" [value]="production.inProgress" icon="pi-play-circle" tone="warning" />
+      <app-dashboard-metric-card [label]="'dashboard.completedToday' | translate" [value]="production.completedToday" icon="pi-check-circle" tone="success" />
     </div>
-    <h3>{{ 'dashboard.recentProduction' | translate }}</h3>
-    <div class="recent-list">
-      @for (order of production.recent; track order.id) {
-        <div>
-          <strong>{{ order.code }}</strong
-          ><span
-            >{{ order.outputItemName }} · {{ order.plannedQuantity | localizedNumber }}
-            {{ 'enum.unit.' + order.unit | translate }}</span
-          ><p-tag [value]="'enum.productionStatus.' + order.status | translate" />
-        </div>
-      } @empty {
-        <p>{{ 'dashboard.noRecentProduction' | translate }}</p>
-      }
+
+    <section class="recent-production" aria-labelledby="recent-title">
+      <h3 id="recent-title">{{ 'dashboard.recentProduction' | translate }}</h3>
+      <div class="recent-list">
+        @for (order of production.recent; track order.id) {
+          <article class="recent-order">
+            <div class="recent-order__identity">
+              <strong>{{ order.code }}</strong>
+              <span>{{ order.outputItemName }}</span>
+            </div>
+            <span class="recent-order__quantity">
+              {{ order.actualQuantity ?? order.plannedQuantity | localizedNumber }}
+              {{ 'enum.unit.' + order.unit | translate }}
+            </span>
+            <app-status-badge
+              [label]="'enum.productionStatus.' + order.status | translate"
+              [tone]="productionTone(order.status)"
+            />
+          </article>
+        } @empty {
+          <p class="empty-copy">{{ 'dashboard.noRecentProduction' | translate }}</p>
+        }
+      </div>
+    </section>
+  </app-section-card>
+}
+
+@if (status$ | async; as system) {
+  <app-section-card class="infrastructure-panel" aria-labelledby="status-title">
+    <div class="section-heading infrastructure-heading">
+      <div>
+        <span class="kicker">{{ 'dashboard.infrastructure' | translate }}</span>
+        <h2 id="status-title">{{ 'dashboard.essentialServices' | translate }}</h2>
+      </div>
+      <app-status-badge
+        [label]="(system.status === 'UP' ? 'dashboard.operational' : 'dashboard.unavailable') | translate"
+        [tone]="system.status === 'UP' ? 'success' : 'danger'"
+      />
+    </div>
+    <div class="infrastructure-list">
+      <div><span>Backend</span><app-status-badge [label]="(system.status === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate" [tone]="system.status === 'UP' ? 'success' : 'danger'" /></div>
+      <div><span>PostgreSQL</span><app-status-badge [label]="(system.postgres === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate" [tone]="system.postgres === 'UP' ? 'success' : 'danger'" /></div>
+      <div><span>Redis</span><app-status-badge [label]="(system.redis === 'UP' ? 'dashboard.up' : 'dashboard.down') | translate" [tone]="system.redis === 'UP' ? 'success' : 'danger'" /></div>
     </div>
   </app-section-card>
 }

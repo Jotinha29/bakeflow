@@ -121,6 +121,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.title': 'Gestão inteligente de estoque e produção.',
     'dashboard.belowMinimum': 'Itens abaixo do estoque mínimo',
     'dashboard.expiringBatches': 'Lotes próximos do vencimento',
+    'dashboard.inventoryOverview': 'Situação do estoque',
+    'dashboard.essentialServices': 'Serviços essenciais',
     'dashboard.subtitle':
       'Uma base confiável para organizar operações de alimentos com clareza e precisão.',
     'dashboard.infrastructure': 'Infraestrutura',
@@ -403,6 +405,8 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.title': 'Smart inventory and production management.',
     'dashboard.belowMinimum': 'Items below minimum stock',
     'dashboard.expiringBatches': 'Batches expiring soon',
+    'dashboard.inventoryOverview': 'Inventory status',
+    'dashboard.essentialServices': 'Essential services',
     'dashboard.subtitle':
       'A reliable foundation for organizing food operations with clarity and precision.',
     'dashboard.infrastructure': 'Infrastructure',
