@@ -1,103 +1,120 @@
-<app-page-header [eyebrow]="'inventory.physicalStructure'|translate" [title]="'locations.title'|translate" [description]="'locations.subtitle'|translate">
-  @if(auth.can('ITEM_WRITE')){<p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />}
-</app-page-header>
-<form class="filter-panel location-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
-  <div class="field">
-    <label for="location-search">{{ 'common.name' | translate }}</label
-    ><input pInputText id="location-search" formControlName="search" />
-  </div>
-  <div class="field">
-    <label for="location-type">{{ 'common.type' | translate }}</label
-    ><p-select
-      inputId="location-type"
-      formControlName="type"
-      [options]="types()"
-      optionLabel="label"
-      optionValue="value"
-      [showClear]="true"
-    />
-  </div>
-  <div class="field">
-    <label for="location-status">{{ 'common.status' | translate }}</label
-    ><p-select
-      inputId="location-status"
-      formControlName="active"
-      [options]="statuses()"
-      optionLabel="label"
-      optionValue="value"
-      [showClear]="true"
-    />
-  </div>
-  <div class="actions">
-    <p-button
-      type="button"
-      [label]="'common.clear' | translate"
-      severity="secondary"
-      [outlined]="true"
-      (onClick)="clearFilters()"
-    /><p-button type="submit" [label]="'common.filter' | translate" icon="pi pi-filter" />
-  </div>
-</form>
-<section class="card tree-card">
-  <div class="tree-title">
-    <i class="pi pi-sitemap"></i><strong>{{ 'locations.structure' | translate }}</strong>
-  </div>
-  @if (!loading() && nodes().length === 0) {
-    <div class="empty">
-      <p>{{ 'locations.empty' | translate }}</p>
-      @if(auth.can('ITEM_WRITE')){<p-button [label]="'locations.create' | translate" [text]="true" (onClick)="open()" />}
-    </div>
-  } @else {
-    <p-tree [value]="nodes()" [loading]="loading()"
-      ><ng-template #default let-node
-        ><div class="location-node">
-          <span>{{ node.label }}</span
-          ><small>{{ label(node.data.type) }} · {{ node.data.code }}</small
-          ><p-tag
-            [value]="(node.data.active ? 'common.active' : 'common.inactive') | translate"
-            [severity]="node.data.active ? 'success' : 'secondary'"
-          />
-          @if(auth.can('ITEM_WRITE')){<div class="node-actions">
-            <p-button
-              icon="pi pi-pencil"
-              [rounded]="true"
-              [text]="true"
-              severity="secondary"
-              [pTooltip]="'locations.viewOrEdit' | translate"
-              [attr.aria-label]="('common.edit' | translate) + ' ' + node.label"
-              (onClick)="open(node.data)"
-            /><p-button
-              icon="pi pi-plus"
-              [rounded]="true"
-              [text]="true"
-              severity="secondary"
-              [pTooltip]="'locations.addChild' | translate"
-              [attr.aria-label]="('locations.addChild' | translate) + ' ' + node.label"
-              (onClick)="open(undefined, node.data)"
-            /><p-button
-              [icon]="node.data.active ? 'pi pi-ban' : 'pi pi-check'"
-              [rounded]="true"
-              [text]="true"
-              [severity]="node.data.active ? 'danger' : 'success'"
-              [pTooltip]="(node.data.active ? 'common.deactivate' : 'common.activate') | translate"
-              [attr.aria-label]="
-                ((node.data.active ? 'common.deactivate' : 'common.activate') | translate) +
-                ' ' +
-                node.label
-              "
-              (onClick)="toggle(node.data)"
-            />
-          </div>}</div></ng-template
-    ></p-tree>
+<app-page-header
+  [eyebrow]="'inventory.physicalStructure' | translate"
+  [title]="'locations.title' | translate"
+  [description]="'locations.subtitle' | translate"
+>
+  @if (auth.can('ITEM_WRITE')) {
+    <p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />
   }
-</section>
+</app-page-header>
+<form class="location-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
+  <app-filter-panel>
+    <div class="field">
+      <label for="location-search">{{ 'common.name' | translate }}</label
+      ><input pInputText id="location-search" formControlName="search" />
+    </div>
+    <div class="field">
+      <label for="location-type">{{ 'common.type' | translate }}</label
+      ><p-select
+        inputId="location-type"
+        formControlName="type"
+        [options]="types()"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+      />
+    </div>
+    <div class="field">
+      <label for="location-status">{{ 'common.status' | translate }}</label
+      ><p-select
+        inputId="location-status"
+        formControlName="active"
+        [options]="statuses()"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+      />
+    </div>
+    <div filterActions class="filter-actions">
+      <p-button
+        type="button"
+        [label]="'common.clear' | translate"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="clearFilters()"
+      /><p-button type="submit" [label]="'common.filter' | translate" icon="pi pi-filter" />
+    </div>
+  </app-filter-panel>
+</form>
+@if (loading()) {
+  <app-section-card><app-loading-state [label]="'common.loading' | translate" /></app-section-card>
+} @else if (nodes().length === 0) {
+  <app-section-card
+    ><app-empty-state
+      icon="pi-sitemap"
+      [title]="(hasLocations() ? 'locations.noResultsTitle' : 'locations.emptyTitle') | translate"
+      [description]="
+        (hasLocations() ? 'locations.noResultsDescription' : 'locations.emptyDescription')
+          | translate
+      "
+    >
+      @if (!hasLocations() && auth.can('ITEM_WRITE')) {
+        <p-button [label]="'locations.create' | translate" icon="pi pi-plus" (onClick)="open()" />
+      }</app-empty-state
+  ></app-section-card>
+} @else {
+  <div class="location-workspace">
+    <app-section-card
+      [title]="'locations.structure' | translate"
+      [description]="'locations.structureHint' | translate"
+    >
+      <p-tree
+        [value]="nodes()"
+        selectionMode="single"
+        [selection]="selectedNode()"
+        (onNodeSelect)="selectNode($event)"
+      >
+        <ng-template #default let-node
+          ><div class="location-node">
+            <span class="node-identity"
+              ><strong>{{ node.label }}</strong
+              ><small>{{ label(node.data.type) }} · {{ node.data.code }}</small></span
+            ><app-status-badge
+              [label]="(node.data.active ? 'common.active' : 'common.inactive') | translate"
+              [tone]="node.data.active ? 'success' : 'secondary'"
+            /></div
+        ></ng-template>
+      </p-tree>
+    </app-section-card>
+    @if (selectedLocation(); as selected) {
+      <app-location-details-panel
+        [location]="selected"
+        [parentName]="selectedParentName()"
+        [hierarchyPath]="selectedPath()"
+        [typeLabel]="label(selected.type)"
+        [canManage]="auth.can('ITEM_WRITE')"
+        (edit)="open(selected)"
+        (addChild)="open(undefined, selected)"
+        (toggleActive)="toggle(selected)"
+      />
+    } @else {
+      <app-section-card [title]="'locations.details' | translate"
+        ><app-empty-state
+          icon="pi-map-marker"
+          [title]="'locations.selectTitle' | translate"
+          [description]="'locations.selectDescription' | translate"
+      /></app-section-card>
+    }
+  </div>
+}
 <p-dialog
   [header]="(editing() ? 'locations.edit' : 'locations.create') | translate"
   [visible]="dialog()"
   (visibleChange)="dialog.set($event)"
   [modal]="true"
-  [style]="{ width: '38rem' }"
-  ><form [formGroup]="form" (ngSubmit)="save()">
+  [style]="{ width: '38rem', maxWidth: 'calc(100vw - 2rem)' }"
+>
+  <form [formGroup]="form" (ngSubmit)="save()">
     <div class="form-grid">
       <div class="field wide">
         <label for="location-name">{{ 'common.name' | translate }} *</label
@@ -144,5 +161,6 @@
         [loading]="submitting()"
         [disabled]="form.invalid || submitting()"
       />
-    </div></form
-></p-dialog>
+    </div>
+  </form>
+</p-dialog>

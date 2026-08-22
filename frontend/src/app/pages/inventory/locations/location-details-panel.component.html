@@ -1,0 +1,70 @@
+<app-section-card [title]="'locations.details' | translate">
+  <div class="details-heading">
+    <div>
+      <span class="details-eyebrow">{{ 'locations.selectedLocation' | translate }}</span>
+      <h3>{{ location().name }}</h3>
+      <span class="location-code">{{ location().code }}</span>
+    </div>
+    <app-status-badge
+      [label]="(location().active ? 'common.active' : 'common.inactive') | translate"
+      [tone]="location().active ? 'success' : 'secondary'"
+    />
+  </div>
+  <nav class="hierarchy-path" [attr.aria-label]="'locations.hierarchyPath' | translate">
+    @for (part of hierarchyPath(); track $index) {
+      @if (!$first) {
+        <i class="pi pi-angle-right" aria-hidden="true"></i>
+      }
+      <span [class.current]="$last">{{ part }}</span>
+    }
+  </nav>
+  <dl class="details-grid">
+    <div>
+      <dt>{{ 'common.type' | translate }}</dt>
+      <dd>{{ typeLabel() }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'common.status' | translate }}</dt>
+      <dd>{{ (location().active ? 'common.active' : 'common.inactive') | translate }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'locations.parent' | translate }}</dt>
+      <dd>{{ parentName() }}</dd>
+    </div>
+    <div>
+      <dt>{{ 'locations.directChildren' | translate }}</dt>
+      <dd>
+        {{ location().children.length }}
+        {{
+          (location().children.length === 1
+            ? 'locations.locationSingular'
+            : 'locations.locationPlural'
+          ) | translate
+        }}
+      </dd>
+    </div>
+  </dl>
+  @if (canManage()) {
+    <div class="details-actions">
+      <p-button
+        [label]="'common.edit' | translate"
+        icon="pi pi-pencil"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="edit.emit()"
+      />
+      <p-button
+        [label]="'locations.addChild' | translate"
+        icon="pi pi-plus"
+        (onClick)="addChild.emit()"
+      />
+      <p-button
+        [label]="(location().active ? 'common.deactivate' : 'common.activate') | translate"
+        [icon]="location().active ? 'pi pi-ban' : 'pi pi-check'"
+        [severity]="location().active ? 'danger' : 'success'"
+        [outlined]="true"
+        (onClick)="toggleActive.emit()"
+      />
+    </div>
+  }
+</app-section-card>

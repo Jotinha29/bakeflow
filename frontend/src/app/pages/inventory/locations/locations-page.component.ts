@@ -7,8 +7,6 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TreeModule } from 'primeng/tree';
-import { TagModule } from 'primeng/tag';
-import { TooltipModule } from 'primeng/tooltip';
 import { InventoryService } from '../../../features/inventory/inventory.service';
 import {
   Location,
@@ -19,6 +17,12 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { FilterPanelComponent } from '../../../shared/ui/filter-panel/filter-panel.component';
+import { SectionCardComponent } from '../../../shared/ui/section-card/section-card.component';
+import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { LoadingStateComponent } from '../../../shared/ui/loading-state/loading-state.component';
+import { StatusBadgeComponent } from '../../../shared/ui/status-badge/status-badge.component';
+import { LocationDetailsPanelComponent } from './location-details-panel.component';
 @Component({
   selector: 'app-locations-page',
   imports: [
@@ -28,10 +32,14 @@ import { AuthService } from '../../../core/auth/auth.service';
     InputTextModule,
     SelectModule,
     TreeModule,
-    TagModule,
-    TooltipModule,
     TranslatePipe,
     PageHeaderComponent,
+    FilterPanelComponent,
+    SectionCardComponent,
+    EmptyStateComponent,
+    LoadingStateComponent,
+    StatusBadgeComponent,
+    LocationDetailsPanelComponent,
   ],
   templateUrl: './locations-page.component.html',
   styleUrls: ['../inventory-page.scss', './locations-page.component.scss'],
@@ -47,7 +55,34 @@ export class LocationsPageComponent {
   protected loading = signal(false);
   protected submitting = signal(false);
   protected nodes = signal<TreeNode<Location>[]>([]);
+  private tree = signal<Location[]>([]);
+  private expandedLocationIds = signal<Set<string> | undefined>(undefined);
   protected allLocations = signal<Location[]>([]);
+  protected hasLocations = computed(() => this.tree().length > 0);
+  protected selectedNode = signal<TreeNode<Location> | null>(null);
+  protected selectedLocation = computed(() => this.selectedNode()?.data);
+  protected selectedParentName = computed(() => {
+    const selected = this.selectedLocation();
+    return selected?.parentId
+      ? (this.allLocations().find((location) => location.id === selected.parentId)?.name ??
+          this.i18n.translate('locations.noParent'))
+      : this.i18n.translate('locations.structure');
+  });
+  protected selectedPath = computed(() => {
+    const selected = this.selectedLocation();
+    if (!selected) return [];
+    const path = [selected.name];
+    let parentId = selected.parentId;
+    const visited = new Set<string>();
+    while (parentId && !visited.has(parentId)) {
+      visited.add(parentId);
+      const parent = this.allLocations().find((location) => location.id === parentId);
+      if (!parent) break;
+      path.unshift(parent.name);
+      parentId = parent.parentId;
+    }
+    return [this.i18n.translate('locations.structure'), ...path];
+  });
   protected dialog = signal(false);
   protected editing = signal<Location | undefined>(undefined);
   protected types = computed(() =>
@@ -81,42 +116,37 @@ export class LocationsPageComponent {
     this.loadTree();
   }
   protected loadTree() {
+    const selectedId = this.selectedLocation()?.id;
+    this.captureExpansion();
     this.loading.set(true);
     this.api
       .locationTree()
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (tree) => {
+          this.tree.set(tree);
           this.allLocations.set(this.flatten(tree));
           this.nodes.set(this.mapNodes(tree));
+          this.restoreSelection(selectedId);
         },
         error: () => this.error(this.i18n.translate('locations.loadError')),
       });
   }
   protected applyFilters() {
     const f = this.filters.getRawValue();
-    if (!f.search && !f.type && f.active === undefined) {
-      this.loadTree();
-      return;
-    }
-    this.loading.set(true);
-    this.api
-      .locations({
-        search: f.search || undefined,
-        type: f.type || undefined,
-        active: f.active ?? undefined,
-        page: 0,
-        size: 100,
-      })
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (r) => this.nodes.set(r.content.map((l) => this.node({ ...l, children: [] }))),
-        error: () => this.error(this.i18n.translate('locations.filterError')),
-      });
+    this.captureExpansion();
+    const filtered = this.filterTree(
+      this.tree(),
+      f.search ?? '',
+      f.type ?? '',
+      f.active ?? undefined,
+    );
+    this.nodes.set(this.mapNodes(filtered));
+    this.restoreSelection(this.selectedLocation()?.id);
   }
   protected clearFilters() {
     this.filters.reset({ search: '', type: '', active: undefined });
-    this.loadTree();
+    this.applyFilters();
   }
   protected open(location?: Location, parent?: Location) {
     this.editing.set(location);
@@ -186,18 +216,65 @@ export class LocationsPageComponent {
   protected label(v: string) {
     return this.i18n.translate(`enum.locationType.${v}`);
   }
+  protected selectNode(event: { node: TreeNode<Location> }) {
+    this.selectedNode.set(event.node);
+  }
   private mapNodes(values: Location[]): TreeNode<Location>[] {
     return values.map((v) => this.node(v));
   }
   private node(v: Location): TreeNode<Location> {
+    const expandedIds = this.expandedLocationIds();
     return {
       key: v.id,
       label: v.name,
       data: v,
-      expanded: true,
+      expanded: expandedIds === undefined || expandedIds.has(v.id),
       icon: this.icon(v.type),
       children: this.mapNodes(v.children ?? []),
     };
+  }
+  private captureExpansion() {
+    if (this.nodes().length) this.expandedLocationIds.set(this.expandedIds(this.nodes()));
+  }
+  private expandedIds(nodes: TreeNode<Location>[]) {
+    const ids = new Set<string>();
+    const visit = (values: TreeNode<Location>[]) =>
+      values.forEach((value) => {
+        if (value.expanded && value.key) ids.add(String(value.key));
+        visit(value.children ?? []);
+      });
+    visit(nodes);
+    return ids;
+  }
+  private restoreSelection(id?: string) {
+    if (!id) return;
+    this.selectedNode.set(this.findNode(this.nodes(), id) ?? null);
+  }
+  private findNode(nodes: TreeNode<Location>[], id: string): TreeNode<Location> | undefined {
+    for (const node of nodes) {
+      if (node.key === id) return node;
+      const child = this.findNode(node.children ?? [], id);
+      if (child) return child;
+    }
+    return undefined;
+  }
+  private filterTree(
+    values: Location[],
+    search: string,
+    type: LocationType | '',
+    active: boolean | undefined,
+  ): Location[] {
+    const term = search.trim().toLocaleLowerCase();
+    return values.flatMap((location) => {
+      const children = this.filterTree(location.children ?? [], search, type, active);
+      const matches =
+        (!term ||
+          location.name.toLocaleLowerCase().includes(term) ||
+          location.code.toLocaleLowerCase().includes(term)) &&
+        (!type || location.type === type) &&
+        (active === undefined || location.active === active);
+      return matches || children.length ? [{ ...location, children }] : [];
+    });
   }
   private flatten(values: Location[]): Location[] {
     return values.flatMap((v) => [v, ...this.flatten(v.children ?? [])]);

@@ -1,53 +1,76 @@
 .location-filters {
-  grid-template-columns: repeat(3, 1fr) auto;
+  margin-bottom: var(--space-6);
 }
-.tree-card {
-  padding: 1rem;
+.location-filters app-filter-panel {
+  display: block;
 }
-.tree-title {
-  align-items: center;
-  border-bottom: 1px solid #ece8e0;
+.filter-actions {
   display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: var(--space-3);
+}
+.location-workspace {
+  align-items: start;
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: minmax(18rem, 0.75fr) minmax(25rem, 1.25fr);
 }
 .location-node {
   align-items: center;
   display: flex;
-  gap: 0.75rem;
-  min-width: min(60vw, 700px);
+  gap: var(--space-3);
+  justify-content: space-between;
+  min-width: 0;
   width: 100%;
 }
-.location-node small {
-  color: #7b8580;
-  margin-right: auto;
-}
-.node-actions {
+.node-identity {
   display: flex;
-  opacity: 0.2;
-  transition: opacity 0.2s;
+  flex-direction: column;
+  min-width: 0;
 }
-.location-node:hover .node-actions {
-  opacity: 1;
+.node-identity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.node-identity small {
+  color: var(--bf-text-muted);
+  margin-top: 0.15rem;
 }
 :host ::ng-deep .p-tree {
   border: 0;
-  padding: 0.75rem;
+  padding: 0;
 }
 :host ::ng-deep .p-tree-node-content {
-  padding: 0.4rem;
+  border-radius: var(--bf-radius-md);
+  padding: 0.55rem 0.45rem;
 }
-.tree-title i {
-  color: #ad6733;
+:host ::ng-deep .p-tree-node-content.p-tree-node-selected {
+  background: #f4e8dd;
+  color: var(--bf-text);
+  outline: 1px solid #dfb995;
 }
-@media (max-width: 850px) {
-  .location-filters {
-    grid-template-columns: 1fr 1fr;
+:host ::ng-deep .p-tree-node-content:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--bf-primary, #9a5728) 32%, transparent);
+  outline-offset: 2px;
+}
+:host ::ng-deep .p-tree-node-label {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .location-workspace {
+    grid-template-columns: 1fr;
   }
-  .location-node {
-    min-width: 600px;
+}
+@media (max-width: 600px) {
+  .filter-actions {
+    flex-direction: column-reverse;
+    width: 100%;
   }
-  .node-actions {
-    opacity: 1;
+  .filter-actions p-button {
+    width: 100%;
+  }
+  .location-node app-status-badge {
+    display: none;
   }
 }
